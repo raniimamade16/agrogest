@@ -1,0 +1,27 @@
+# /etc/systemd/system/tomcat.service — Apache Tomcat 10.1 a servir o AgroGest
+[Unit]
+Description=Apache Tomcat 10.1 (AgroGest)
+After=network.target
+
+[Service]
+Type=forking
+User=tomcat
+Group=tomcat
+
+Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+Environment="CATALINA_HOME=/opt/tomcat"
+Environment="CATALINA_BASE=/opt/tomcat"
+Environment="CATALINA_PID=/opt/tomcat/temp/tomcat.pid"
+# agrogest.dados = pasta onde a aplicação grava agrogest.ser
+Environment="CATALINA_OPTS=-Xms256M -Xmx512M -Dagrogest.dados=/var/lib/agrogest"
+
+ExecStart=/opt/tomcat/bin/startup.sh
+# shutdown.sh faz um encerramento ordenado: o AppListener grava o estado antes de sair
+ExecStop=/opt/tomcat/bin/shutdown.sh 20 -force
+SuccessExitStatus=143
+TimeoutStopSec=40
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

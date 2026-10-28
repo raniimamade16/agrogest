@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>AgroGest — Manual de Uso</title>
+<style>
+    @page { size: A4; margin: 18mm 16mm 18mm; }
+    @page :first { margin: 0; }
+    * { box-sizing: border-box; }
+    body { font: 10.5pt/1.5 "Schibsted Grotesk", -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #1f2620; margin: 0; }
+    @font-face { font-family: "Young Serif"; font-weight: 100 900; src: url(../src/main/webapp/fonts/young-serif-latin.woff2) format("woff2"); }
+    @font-face { font-family: "Schibsted Grotesk"; font-weight: 400 700; src: url(../src/main/webapp/fonts/schibsted-grotesk-latin.woff2) format("woff2"); }
+    h1, h2, h3 { font-family: "Young Serif", Georgia, serif; font-weight: 400; color: #2a211c; }
+    h1 { font-size: 30pt; margin: 0 0 6pt; font-weight: 400; }
+    h1 strong { color: #b4532a; }
+    h2 { font-size: 17pt; border-bottom: 2px solid #2a211c; padding-bottom: 4pt; margin: 0 0 12pt; break-before: page; }
+    h3 { font-size: 12.5pt; margin: 18pt 0 6pt; break-after: avoid; }
+    p, li { orphans: 3; widows: 3; }
+    ol.passos { padding-left: 18pt; margin: 4pt 0 8pt; }
+    ol.passos li { margin-bottom: 3pt; }
+    figure { margin: 8pt 0 14pt; break-inside: avoid; }
+    figure img { width: 100%; border: 1px solid #ddd5c4; border-radius: 4pt; display: block; }
+    figcaption { font-size: 8.5pt; color: #66705f; margin-top: 3pt; }
+    code, kbd { font: 9pt Menlo, Consolas, monospace; background: #f4eee5; padding: 0 3pt; border-radius: 2pt; }
+    table { border-collapse: collapse; width: 100%; margin: 6pt 0 12pt; font-size: 9.5pt; break-inside: avoid; }
+    th, td { border: 1px solid #ddd5c4; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+    th { background: #f4eee5; color: #2a211c; }
+    .nota { background: #fbf1d3; border-left: 3pt solid #d9a521; padding: 6pt 10pt; margin: 8pt 0; break-inside: avoid; }
+    .capa { height: 296mm; display: flex; flex-direction: column; justify-content: center;
+        background: #6e2f17; color: #f6e9dc; margin: 0; padding: 30mm;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .capa h1 strong { color: #e0a526; }
+    .capa h1 { color: #fff; font-size: 44pt; }
+    .capa .sub { font-size: 16pt; margin: 0 0 30pt; }
+    .capa dl { display: grid; grid-template-columns: auto 1fr; gap: 4pt 14pt; font-size: 11pt; margin: 0; }
+    .capa dt { color: #d9a521; }
+    .capa dd { margin: 0; }
+    .indice ol { columns: 2; font-size: 10.5pt; }
+    .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
+</style>
+</head>
+<body>
+
+<section class="capa">
+    <img src="../src/main/webapp/img/logo.svg" width="70" alt="">
+    <h1>Agro<strong>Gest</strong></h1>
+    <p class="sub">Manual de Uso — Administrador e Cliente</p>
+    <dl>
+        <dt>Disciplina</dt><dd>Sistemas Distribuídos — Engenharia Informática</dd>
+        <dt>Tecnologia</dt><dd>Java 17 · Jakarta Servlets 6 · JSP/JSTL · Apache Tomcat 10.1 · Maven</dd>
+        <dt>Endereço</dt><dd>http://&lt;servidor&gt;:8081/agrogest/</dd>
+        <dt>Autores</dt><dd>Caiado Binda, Ranim Amade e Ziyad Luto</dd>
+        <dt>Instituição</dt><dd>ISCTEM — Instituto Superior de Ciências e Tecnologia de Moçambique</dd>
+        <dt>Versão</dt><dd>1.0.0 · Outubro de 2026</dd>
+    </dl>
+</section>
+
+<h2>1. Introdução</h2>
+<p>O AgroGest é uma aplicação web para um agricultor da província de Nampula gerir os seus fornecedores,
+    o catálogo de produtos (sementes, fertilizantes, maquinaria e ferramentas), as campanhas agrícolas com os respetivos
+    cultivos e colheitas, e a venda de produtos a clientes com emissão de factura.</p>
+<p>No primeiro arranque o sistema já traz dados de demonstração realistas: 4 fornecedores, 15 produtos com fotografia
+    (sementes de variedades cultivadas no norte de Moçambique, como o milho Matuba e o feijão nhemba IT-18, adubos, ferramentas e máquinas),
+    8 clientes, 10 vendas e 2 campanhas concluídas com cultivos e colheitas. Os nomes, contactos e endereços de fornecedores e clientes são fictícios.</p>
+
+<h3>1.1 Perfis de utilizador</h3>
+<table>
+    <tr><th>Perfil</th><th>Como obter acesso</th><th>O que pode fazer</th></tr>
+    <tr><td><b>Administrador</b></td><td>Conta fixa: <code>admin@agro.mz</code> / <code>admin234</code></td>
+        <td>Gerir fornecedores, produtos, campanhas, cultivos e colheitas; consultar listagens, compras, relatórios; gravar o estado.</td></tr>
+    <tr><td><b>Cliente</b></td><td>Auto-registo em <i>Criar conta</i>. Contas de demonstração: <code>ana@teste.mz</code>, <code>carlos@teste.mz</code>, <code>fatima@teste.mz</code> e outras (ver README) / <code>cliente123</code></td>
+        <td>Consultar o catálogo, gerir o carrinho, comprar, ver e imprimir as suas facturas.</td></tr>
+</table>
+
+<h3>1.2 Convenções da interface</h3>
+<ul>
+    <li>Depois de cada ação aparece no topo uma mensagem <b>verde</b> (sucesso) ou <b>vermelha</b> (erro, com a explicação).</li>
+    <li>Valores monetários em meticais (<b>MT</b>), no formato <code>1.234,56 MT</code>. Datas em <code>dd/mm/aaaa</code>.</li>
+    <li>Os preços do catálogo não incluem IVA. O IVA de <b>16%</b> é somado no carrinho e na factura.</li>
+    <li>Em ecrãs pequenos (telemóvel) o menu fica recolhido no botão ☰ no canto superior direito.</li>
+</ul>
+
+<h2>2. Entrar no sistema</h2>
+<figure><img src="img/01-login.png" alt=""><figcaption>Figura 1 — Página de entrada.</figcaption></figure>
+<ol class="passos">
+    <li>Abra <code>http://&lt;servidor&gt;:8081/agrogest/</code> no navegador.</li>
+    <li>Introduza o <b>email</b> e a <b>palavra-passe</b> e clique em <b>Entrar</b>.</li>
+    <li>O administrador é levado ao <b>Painel</b>; o cliente ao <b>Catálogo</b>.</li>
+    <li>Para sair, clique em <b>Sair</b> no canto superior direito.</li>
+</ol>
+<div class="nota">Se tentar abrir uma página protegida sem sessão, o sistema pede o login e, depois de entrar, leva-o de volta à página pedida.
+    Um cliente que tente abrir uma página <code>/admin/…</code> recebe a mensagem <b>403 — Acesso negado</b>.</div>
+
+<h2>3. Módulo Cliente</h2>
+
+<h3>3.1 Criar conta (auto-registo)</h3>
+<figure><img src="img/02-registo.png" alt=""><figcaption>Figura 2 — Criar conta de cliente.</figcaption></figure>
+<ol class="passos">
+    <li>Na página de entrada clique em <b>Registe-se como cliente</b>.</li>
+    <li>Preencha <b>nome</b>, <b>email</b>, <b>palavra-passe</b> (mínimo 4 caracteres, duas vezes), <b>telefone</b> e <b>endereço</b>.
+        Exemplo: <i>João Silva, joao@teste.mz, 1234, Av. Eduardo Mondlane, Nampula</i>.</li>
+    <li>Clique em <b>Criar conta</b>. A sessão é iniciada automaticamente.</li>
+</ol>
+<p>O email é único. Se já existir uma conta com esse email, o sistema avisa e mantém os dados preenchidos.</p>
+
+<h3>3.2 Consultar o catálogo</h3>
+<figure><img src="img/03-catalogo.png" alt=""><figcaption>Figura 3 — Catálogo com filtro por categoria.</figcaption></figure>
+<p>Cada produto mostra a fotografia, categoria, nome, descrição, fornecedor, quantidade disponível, validade e preço por unidade.
+    Use os botões <b>Todas / Semente / Fertilizante / Maquinaria / Ferramenta</b> para filtrar.
+    Só aparecem produtos com stock e dentro da validade.</p>
+
+<h3>3.3 Adicionar ao carrinho</h3>
+<ol class="passos">
+    <li>No cartão do produto escreva a <b>quantidade</b> (ex.: 3 kg de <i>Semente de Milho Matuba</i>) e clique em <b>Adicionar</b>.</li>
+    <li>Repita para outros produtos (ex.: 1 saco de <i>Adubo Nitrato de Amónio 33,5% N</i>). O contador junto a <b>Carrinho</b> no menu mostra o número de linhas.</li>
+</ol>
+<p>Se pedir mais do que o stock disponível, o sistema recusa e indica quantas unidades existem.</p>
+
+<h3>3.4 Gerir o carrinho</h3>
+<figure><img src="img/04-carrinho.png" alt=""><figcaption>Figura 4 — Carrinho com subtotal, IVA e total.</figcaption></figure>
+<ul>
+    <li><b>Alterar quantidade:</b> mude o número e clique em <b>Atualizar</b> (0 remove a linha).</li>
+    <li><b>Remover item:</b> botão <b>Remover</b> na linha.</li>
+    <li><b>Esvaziar carrinho:</b> botão no fundo da tabela.</li>
+</ul>
+<p>O carrinho fica guardado na sessão: pode voltar ao catálogo e continuar a comprar.</p>
+
+<h3>3.5 Finalizar a compra e emitir a factura</h3>
+<figure><img src="img/05-compra.png" alt=""><figcaption>Figura 5 — Confirmação da compra.</figcaption></figure>
+<ol class="passos">
+    <li>No carrinho clique em <b>Finalizar compra</b>.</li>
+    <li>Verifique os itens, os seus dados de facturação e o total com IVA.</li>
+    <li>Clique em <b>Confirmar e emitir factura</b>.</li>
+</ol>
+<p>Ao confirmar, o sistema volta a verificar o stock de <b>todos</b> os produtos. Se algum ficou indisponível entretanto
+    (por exemplo, porque outro cliente comprou), a compra não é feita, o stock não é alterado
+    e aparece a lista de produtos em falta. Se tudo estiver disponível, o stock é descontado e a factura é emitida com número sequencial
+    (<code>FT-2026-1</code>, <code>FT-2026-2</code>, …).</p>
+
+<h3>3.6 Ver e imprimir a factura</h3>
+<figure><img src="img/06-factura.png" alt=""><figcaption>Figura 6 — Factura com dados do cliente, itens, subtotal, IVA 16% e total.</figcaption></figure>
+<p>Clique em <b>Imprimir factura</b> (ou <kbd>Ctrl</kbd>+<kbd>P</kbd>). A impressão mostra só a factura, sem menus nem botões.
+    Para gerar um PDF, escolha <i>Guardar como PDF</i> na janela de impressão.</p>
+
+<h3>3.7 Histórico de compras</h3>
+<figure><img src="img/07-minhas-compras.png" alt=""><figcaption>Figura 7 — Minhas compras.</figcaption></figure>
+<p>Em <b>Minhas compras</b> estão todas as compras anteriores, das mais recentes para as mais antigas. <b>Ver factura</b> abre a factura correspondente.
+    Cada cliente só consegue ver as suas próprias facturas.</p>
+
+<h2>4. Módulo Administrador</h2>
+
+<h3>4.1 Painel</h3>
+<figure><img src="img/10-dashboard.png" alt=""><figcaption>Figura 8 — Painel do administrador.</figcaption></figure>
+<p>Mostra o número de fornecedores, produtos, clientes, vendas e campanhas (cada indicador é uma ligação para a área respetiva),
+    o total facturado, o valor das colheitas, as últimas 5 vendas e os produtos com stock abaixo de 20 unidades.</p>
+
+<h3>4.2 Fornecedores</h3>
+<figure><img src="img/11-fornecedores.png" alt=""><figcaption>Figura 9 — Gestão de fornecedores.</figcaption></figure>
+<ol class="passos">
+    <li>Menu <b>Fornecedores</b>.</li>
+    <li>Preencha <b>nome</b> (ex.: <i>Sementes do Sul, Lda</i>), <b>tipo</b> (SEMENTES, MAQUINARIA, FERTILIZANTES), <b>contacto</b> e <b>província</b> (ex.: <i>Maputo</i>).</li>
+    <li>Clique em <b>Criar fornecedor</b>. Para apagar, use <b>Remover</b> na linha.</li>
+</ol>
+<p>Um fornecedor com produtos associados não pode ser removido. Remova primeiro os produtos.</p>
+
+<h3>4.3 Produtos</h3>
+<figure><img src="img/12-produtos.png" alt=""><figcaption>Figura 10 — Criar produto, repor stock e alterar preço.</figcaption></figure>
+<ol class="passos">
+    <li>Menu <b>Produtos</b>.</li>
+    <li>Preencha o formulário: <b>nome</b> (ex.: <i>Semente Feijão nhemba</i>), <b>categoria</b> (SEMENTE), <b>fornecedor</b> (<i>Sementes do Sul</i>),
+        <b>preço</b> (320), <b>quantidade</b> (400), <b>unidade</b> (kg), <b>validade</b> (+8 meses), <b>foto</b> (URL, opcional) e <b>descrição</b>.</li>
+    <li>Clique em <b>Criar produto</b>.</li>
+    <li><b>Repor stock:</b> na linha do produto, escreva a quantidade a <i>acrescentar</i> em “+ qtd” e clique em <b>Atualizar</b>.
+        No mesmo formulário pode indicar um <b>novo preço</b>.</li>
+    <li><b>Remover:</b> botão <b>Remover</b>. As facturas antigas mantêm o nome e o preço do produto.</li>
+</ol>
+<p>Os produtos fora da validade ficam assinalados a vermelho e deixam de aparecer no catálogo do cliente.</p>
+
+<h3>4.4 Campanhas</h3>
+<figure><img src="img/13-campanhas.png" alt=""><figcaption>Figura 11 — Campanhas agrícolas.</figcaption></figure>
+<ol class="passos">
+    <li>Menu <b>Campanhas</b>. Indique o <b>nome</b> (ex.: <i>Campanha 2026/2027</i>), a <b>data de início</b> (01/10/2026) e a <b>data de fim</b> (30/06/2027).</li>
+    <li>Clique em <b>Criar campanha</b>.</li>
+    <li>Use <b>Fechar</b> e <b>Reabrir</b> para mudar o estado. Numa campanha fechada não se registam novos cultivos.</li>
+</ol>
+<p>O botão <b>Remover</b> fica inativo enquanto a campanha tiver cultivos associados.</p>
+
+<h3>4.5 Cultivos</h3>
+<figure><img src="img/14-cultivos.png" alt=""><figcaption>Figura 12 — Registo de cultivos por campanha.</figcaption></figure>
+<ol class="passos">
+    <li>Menu <b>Cultivos</b>. Escolha a <b>campanha</b> (só as abertas estão disponíveis).</li>
+    <li>Indique <b>cultura</b> (<i>Feijão nhemba</i>), <b>variedade</b> (<i>Macia</i>), <b>hectares</b> (8) e <b>data de plantio</b> (15/11/2026).</li>
+    <li>Clique em <b>Registar cultivo</b>. A lista pode ser filtrada por campanha.</li>
+</ol>
+<p>Um cultivo com colheitas registadas não pode ser removido.</p>
+
+<h3>4.6 Colheitas</h3>
+<figure><img src="img/15-colheitas.png" alt=""><figcaption>Figura 13 — Colheitas com valor total calculado.</figcaption></figure>
+<ol class="passos">
+    <li>Menu <b>Colheitas</b>. Escolha o <b>cultivo</b>, a <b>data</b>, a <b>quantidade em kg</b> (3200) e o <b>preço por kg</b> (22).</li>
+    <li>Clique em <b>Registar colheita</b>. O sistema calcula o valor total (3200 × 22 = <b>70.400,00 MT</b>).</li>
+</ol>
+<p>A data da colheita não pode ser anterior à data de plantio do cultivo.</p>
+
+<h3>4.7 Listagens</h3>
+<figure><img src="img/17-listagem-produtos.png" alt=""><figcaption>Figura 14 — Listagem de produtos ordenada por preço (decrescente).</figcaption></figure>
+<p>Menu <b>Listagens</b>, com os separadores <b>Produtos</b>, <b>Fornecedores</b>, <b>Clientes</b>, <b>Armazém</b> (só produtos com stock &gt; 0 e o valor total em stock)
+    e <b>Compras detalhadas</b>. Clique no título de uma coluna para ordenar (nome, preço, stock, data, valor).
+    Um segundo clique inverte a ordem (▲ crescente, ▼ decrescente). Em <b>Clientes</b> pode também <b>ativar/desativar</b> contas.</p>
+
+<h3>4.8 Compras detalhadas</h3>
+<figure><img src="img/16-compras.png" alt=""><figcaption>Figura 15 — Compras com todos os dados.</figcaption></figure>
+<p>Cada compra mostra o cliente, o endereço, o telefone, os produtos, as quantidades, o valor unitário, o subtotal, o IVA, o total e a data.
+    O número da factura é uma ligação para a factura imprimível. Pode ordenar por data, valor ou cliente.</p>
+
+<h3>4.9 Relatórios</h3>
+<figure><img src="img/18-relatorios.png" alt=""><figcaption>Figura 16 — Relatórios de clientes.</figcaption></figure>
+<ul>
+    <li><b>Clientes ordenados por nome</b> (A→Z).</li>
+    <li><b>Clientes que compraram</b>, ordenados por volume (valor gasto), com barra proporcional.</li>
+    <li><b>Clientes mais assíduos</b>: ranking por número de compras.</li>
+    <li><b>Clientes sem compras</b>.</li>
+</ul>
+
+<h3>4.10 Persistência</h3>
+<figure><img src="img/19-persistencia.png" alt=""><figcaption>Figura 17 — Gravação manual do estado.</figcaption></figure>
+<p>O estado é <b>gravado automaticamente</b> quando o Tomcat é encerrado e <b>restaurado</b> quando volta a arrancar. Neste menu também pode:</p>
+<ul>
+    <li><b>Gravar agora</b>: grava imediatamente todo o estado no ficheiro <code>agrogest.ser</code>.</li>
+    <li><b>Restaurar do ficheiro</b>: descarta as alterações não gravadas e recarrega o último ficheiro.</li>
+    <li><b>Eliminar ficheiro</b>: apaga o ficheiro e o backup. No próximo arranque sem ficheiro são carregados os dados de demonstração.</li>
+</ul>
+
+<h2>5. Mensagens frequentes</h2>
+<table>
+    <tr><th>Mensagem</th><th>Significado / o que fazer</th></tr>
+    <tr><td>Email ou palavra-passe incorretos</td><td>Verifique os dados. As palavras-passe distinguem maiúsculas de minúsculas.</td></tr>
+    <tr><td>Conta desativada</td><td>O administrador desativou a conta em <i>Listagens → Clientes</i>.</td></tr>
+    <tr><td>Já existe uma conta com o email …</td><td>Use outro email ou entre com a conta existente.</td></tr>
+    <tr><td>Indisponível: só há N … em stock</td><td>Reduza a quantidade pedida.</td></tr>
+    <tr><td>Compra não efetuada: produtos indisponíveis</td><td>Outro cliente comprou entretanto. Ajuste o carrinho; nada foi cobrado nem descontado.</td></tr>
+    <tr><td>Não é possível remover … associado(s)</td><td>Remova primeiro os registos dependentes (cultivos, colheitas ou produtos).</td></tr>
+    <tr><td>A campanha … está fechada</td><td>Reabra a campanha antes de registar cultivos.</td></tr>
+    <tr><td>403 — Acesso negado</td><td>A página é reservada a outro perfil (ex.: cliente em <code>/admin</code>, ou factura de outro cliente).</td></tr>
+</table>
+
+<h2>6. Instalação rápida</h2>
+<p>Detalhes completos no <code>README.md</code>.</p>
+<h3>Compilar</h3>
+<p><code>mvn clean package</code> gera <code>target/agrogest.war</code> e corre os testes automáticos.</p>
+<h3>Local</h3>
+<ol class="passos">
+    <li>Instalar o JDK 17 e o Tomcat 10.1. Em <code>conf/server.xml</code> mudar <code>port="8080"</code> para <code>port="8081"</code>.</li>
+    <li>Copiar <code>agrogest.war</code> para <code>webapps/</code> e executar <code>bin/startup.sh</code> (ou <code>startup.bat</code>).</li>
+    <li>Abrir <code>http://localhost:8081/agrogest/</code>.</li>
+</ol>
+<h3>Servidor Linux (systemd)</h3>
+<p><code>sudo ./deploy/instalar.sh dist/agrogest.war</code>. Depois use
+    <code>sudo systemctl start|stop|restart|status tomcat</code> e <code>journalctl -u tomcat -f</code>.</p>
+
+</body>
+</html>

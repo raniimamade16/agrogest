@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${titulo} · AgroGest</title>
+    <link rel="icon" href="${ctx}/img/logo.svg?v=${applicationScope.versao}" type="image/svg+xml">
+    <link rel="stylesheet" href="${ctx}/css/style.css?v=${applicationScope.versao}">
+</head>
+<body class="${eu.admin ? 'perfil-admin' : 'perfil-cliente'}">
+<header class="topo">
+    <a class="marca" href="${ctx}/">
+        <img src="${ctx}/img/logo.svg?v=${applicationScope.versao}" alt="" width="32" height="32">
+        <span>Agro<strong>Gest</strong></span>
+    </a>
+    <input type="checkbox" id="menu-abrir" class="menu-abrir" aria-label="Abrir menu">
+    <label for="menu-abrir" class="menu-botao" aria-hidden="true"><span></span><span></span><span></span></label>
+    <nav class="menu" aria-label="Menu principal">
+        <c:choose>
+            <c:when test="${eu.admin}">
+                <a href="${ctx}/admin/dashboard" class="${menu eq 'dashboard' ? 'ativo' : ''}">Painel</a>
+                <a href="${ctx}/admin/fornecedores" class="${menu eq 'fornecedores' ? 'ativo' : ''}">Fornecedores</a>
+                <a href="${ctx}/admin/produtos" class="${menu eq 'produtos' ? 'ativo' : ''}">Produtos</a>
+                <a href="${ctx}/admin/campanhas" class="${menu eq 'campanhas' ? 'ativo' : ''}">Campanhas</a>
+                <a href="${ctx}/admin/cultivos" class="${menu eq 'cultivos' ? 'ativo' : ''}">Cultivos</a>
+                <a href="${ctx}/admin/colheitas" class="${menu eq 'colheitas' ? 'ativo' : ''}">Colheitas</a>
+                <a href="${ctx}/admin/listagens" class="${menu eq 'listagens' ? 'ativo' : ''}">Listagens</a>
+                <a href="${ctx}/admin/relatorios" class="${menu eq 'relatorios' ? 'ativo' : ''}">Relatórios</a>
+                <a href="${ctx}/admin/persistencia" class="${menu eq 'persistencia' ? 'ativo' : ''}">Persistência</a>
+            </c:when>
+            <c:when test="${not empty eu}">
+                <a href="${ctx}/catalogo" class="${menu eq 'catalogo' ? 'ativo' : ''}">Catálogo</a>
+                <a href="${ctx}/carrinho" class="${menu eq 'carrinho' ? 'ativo' : ''}">Carrinho
+                    <c:if test="${sessionScope.carrinho.totalItens gt 0}"><span class="contador">${sessionScope.carrinho.totalItens}</span></c:if></a>
+                <a href="${ctx}/minhas-compras" class="${menu eq 'compras' ? 'ativo' : ''}">Minhas compras</a>
+            </c:when>
+        </c:choose>
+        <c:if test="${not empty eu}">
+            <div class="sessao">
+                <span class="sessao-nome" title="<c:out value='${eu.email}'/>"><c:out value="${eu.nome}" /></span>
+                <form method="post" action="${ctx}/logout"><button type="submit" class="ligacao">Sair</button></form>
+            </div>
+        </c:if>
+    </nav>
+</header>
+<main class="conteudo">
+<c:if test="${not empty sessionScope.flash}">
+    <div class="alerta alerta-${sessionScope.flash.tipo}" role="status">
+        <p><c:out value="${sessionScope.flash.texto}" /></p>
+        <c:if test="${not empty sessionScope.flash.detalhes}">
+            <ul><c:forEach var="d" items="${sessionScope.flash.detalhes}"><li><c:out value="${d}" /></li></c:forEach></ul>
+        </c:if>
+    </div>
+    <c:remove var="flash" scope="session" />
+</c:if>
