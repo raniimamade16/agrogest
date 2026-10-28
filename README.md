@@ -5,7 +5,13 @@ Todos os dados vivem em **memória RAM** (listas Java) e são serializados para 
 
 Trabalho prático de **Sistemas Distribuídos** — Engenharia Informática, ISCTEM, 2026.
 
-**Autores:** Caiado Binda, Ranim Amade e Ziyad Luto
+**Autores**
+
+| Nome | N.º de estudante |
+|---|---|
+| Caiado Binda | 20240873 |
+| Ranim Amade | 20240138 |
+| Ziyad Luto | 20240746 |
 
 **[Manual de Uso (PDF)](Manual-de-Uso-AgroGest.pdf)** · **[WAR pronto a publicar](dist/agrogest.war)** · [Créditos das fotografias](docs/CREDITOS-IMAGENS.md)
 
@@ -63,6 +69,8 @@ Já existe uma cópia pronta a publicar em **`dist/agrogest.war`**.
 ## 4. Deploy
 
 ### 4.1 Local (Windows, macOS ou Linux)
+
+> Passo a passo detalhado para **Windows, macOS e Linux** (instalação do Java, Maven e Tomcat) na secção 2 do [Manual de Uso](Manual-de-Uso-AgroGest.pdf).
 
 1. Descarregar e extrair o Tomcat 10.1: <https://tomcat.apache.org/download-10.cgi>
 2. Mudar a porta para **8081** em `conf/server.xml`:

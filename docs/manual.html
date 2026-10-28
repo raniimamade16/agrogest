@@ -37,6 +37,12 @@
     .capa dd { margin: 0; }
     .indice ol { columns: 2; font-size: 10.5pt; }
     .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
+    pre { font: 8.6pt/1.45 Menlo, Consolas, monospace; background: #2a211c; color: #f6e9dc; padding: 8pt 10pt;
+        border-radius: 4pt; white-space: pre-wrap; word-break: break-all; margin: 4pt 0 10pt; break-inside: avoid; }
+    .so { border: 1px solid #e8dfd2; border-radius: 6pt; padding: 2pt 12pt 6pt; margin: 10pt 0 14pt; }
+    .so h3 { margin-top: 10pt; }
+    ol.passos pre { margin-left: -18pt; }
+    p code, li code { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -49,7 +55,7 @@
         <dt>Disciplina</dt><dd>Sistemas Distribuídos — Engenharia Informática</dd>
         <dt>Tecnologia</dt><dd>Java 17 · Jakarta Servlets 6 · JSP/JSTL · Apache Tomcat 10.1 · Maven</dd>
         <dt>Endereço</dt><dd>http://&lt;servidor&gt;:8081/agrogest/</dd>
-        <dt>Autores</dt><dd>Caiado Binda, Ranim Amade e Ziyad Luto</dd>
+        <dt>Autores</dt><dd>Caiado Binda — n.º 20240873<br>Ranim Amade — n.º 20240138<br>Ziyad Luto — n.º 20240746</dd>
         <dt>Instituição</dt><dd>ISCTEM — Instituto Superior de Ciências e Tecnologia de Moçambique</dd>
         <dt>Versão</dt><dd>1.0.0 · Outubro de 2026</dd>
     </dl>
@@ -80,7 +86,97 @@
     <li>Em ecrãs pequenos (telemóvel) o menu fica recolhido no botão ☰ no canto superior direito.</li>
 </ul>
 
-<h2>2. Entrar no sistema</h2>
+<h2>2. Instalação e execução</h2>
+<p>O AgroGest corre em qualquer computador com <b>Java 17 ou superior</b>, <b>Apache Maven</b> e <b>Apache Tomcat 10.1</b>.
+    Os passos são os mesmos nos três sistemas: instalar as ferramentas, configurar a porta <b>8081</b> no Tomcat, compilar o projeto,
+    copiar o ficheiro <code>agrogest.war</code> para a pasta <code>webapps</code> do Tomcat e arrancar.</p>
+
+<h3>2.1 Obter o projeto</h3>
+<p>Com Git: <code>git clone https://github.com/raniimamade16/agrogest.git</code>. Sem Git: no GitHub, botão <b>Code → Download ZIP</b>, e extrair.</p>
+<div class="nota"><b>Dados de demonstração.</b> Não é preciso importar nada. No primeiro arranque, como ainda não existe ficheiro de dados,
+    o sistema cria automaticamente 4 fornecedores, 15 produtos com fotografia, 8 clientes, 10 vendas e 2 campanhas.
+    Os dados que cada pessoa cria ficam só no seu computador (pasta <code>agrogest-dados</code> do Tomcat).</div>
+<div class="nota"><b>Atalho sem compilar.</b> O ficheiro <code>dist/agrogest.war</code> já vem pronto. Se não quiser instalar o Maven,
+    salte o passo de compilação e copie esse ficheiro em vez de <code>target/agrogest.war</code>.</div>
+
+<div class="so">
+<h3>2.2 Windows 10/11</h3>
+<ol class="passos">
+    <li><b>Java 17:</b> instale o <i>Eclipse Temurin 17 (JDK)</i> a partir de <code>https://adoptium.net</code> (ficheiro <code>.msi</code>).
+        No instalador, ative a opção <b>Set JAVA_HOME variable</b>. Ou, na Linha de Comandos:
+<pre>winget install EclipseAdoptium.Temurin.17.JDK</pre></li>
+    <li><b>Maven:</b> descarregue <code>apache-maven-3.9.x-bin.zip</code> de <code>https://maven.apache.org/download.cgi</code> e extraia para
+        <code>C:\apache-maven</code>. Acrescente <code>C:\apache-maven\bin</code> à variável <b>Path</b>
+        (Definições → Sistema → Acerca de → Definições avançadas do sistema → Variáveis de ambiente).</li>
+    <li><b>Tomcat 10.1:</b> descarregue o <i>64-bit Windows zip</i> de <code>https://tomcat.apache.org/download-10.cgi</code> e extraia para <code>C:\tomcat</code>.</li>
+    <li><b>Porta 8081:</b> abra <code>C:\tomcat\conf\server.xml</code> no Bloco de Notas, procure <code>port="8080"</code> e mude para <code>port="8081"</code>.</li>
+    <li>Abra uma <b>nova</b> Linha de Comandos (para carregar o Path) e confirme: <code>java -version</code> e <code>mvn -v</code>.</li>
+    <li><b>Compilar e publicar:</b>
+<pre>cd C:\caminho\para\agrogest
+mvn clean package
+copy target\agrogest.war C:\tomcat\webapps\</pre></li>
+    <li><b>Arrancar:</b> <code>C:\tomcat\bin\catalina.bat run</code> (deixe a janela aberta).</li>
+    <li>Abra <code>http://localhost:8081/agrogest/</code> no navegador.</li>
+    <li><b>Parar:</b> <kbd>Ctrl</kbd>+<kbd>C</kbd> na janela do Tomcat. O estado é gravado automaticamente.</li>
+</ol>
+</div>
+
+<div class="so">
+<h3>2.3 macOS</h3>
+<ol class="passos">
+    <li>Instale o <b>Homebrew</b> (se ainda não tiver) seguindo <code>https://brew.sh</code>.</li>
+    <li><b>Java, Maven e Tomcat</b> (o Maven já instala um JDK recente):
+<pre>brew install maven tomcat@10</pre></li>
+    <li><b>Porta 8081</b> (só uma vez):
+<pre>T=$(brew --prefix tomcat@10)/libexec
+sed -i '' 's/port="8080"/port="8081"/' $T/conf/server.xml</pre></li>
+    <li><b>Compilar e publicar:</b>
+<pre>cd ~/caminho/para/agrogest
+mvn clean package
+cp target/agrogest.war $T/webapps/</pre></li>
+    <li><b>Arrancar:</b> <code>$T/bin/catalina.sh run</code> e abrir <code>http://localhost:8081/agrogest/</code>.</li>
+    <li><b>Parar:</b> <kbd>Ctrl</kbd>+<kbd>C</kbd>. Num terminal novo, defina outra vez a variável <code>T</code> (linha <code>T=...</code> do passo 3).</li>
+</ol>
+</div>
+
+<div class="so">
+<h3>2.4 Linux (Ubuntu / Debian)</h3>
+<ol class="passos">
+    <li><b>Java, Maven e Git:</b>
+<pre>sudo apt update
+sudo apt install -y openjdk-17-jdk maven git curl</pre></li>
+    <li><b>Tomcat 10.1</b> na pasta pessoal e <b>porta 8081</b>:
+<pre>curl -L https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.34/bin/apache-tomcat-10.1.34.tar.gz | tar xz -C ~
+T=~/apache-tomcat-10.1.34
+sed -i 's/port="8080"/port="8081"/' $T/conf/server.xml</pre></li>
+    <li><b>Compilar e publicar:</b>
+<pre>cd ~/caminho/para/agrogest
+mvn clean package
+cp target/agrogest.war $T/webapps/</pre></li>
+    <li><b>Arrancar:</b> <code>$T/bin/catalina.sh run</code> e abrir <code>http://localhost:8081/agrogest/</code>. <b>Parar:</b> <kbd>Ctrl</kbd>+<kbd>C</kbd>.</li>
+    <li><b>Como serviço (servidor):</b> o script incluído instala o Tomcat em <code>/opt/tomcat</code>, regista o serviço <b>systemd</b> e publica o WAR:
+<pre>sudo ./deploy/instalar.sh dist/agrogest.war
+sudo systemctl start|stop|restart|status tomcat
+journalctl -u tomcat -f</pre></li>
+</ol>
+</div>
+
+<h3>2.5 Atualizar para uma nova versão</h3>
+<p>Volte a correr <code>mvn clean package</code> e copie o novo <code>agrogest.war</code> para <code>webapps</code>. Com o Tomcat a correr,
+    a aplicação é republicada sozinha em poucos segundos e os dados são mantidos.</p>
+
+<h3>2.6 Resolução de problemas</h3>
+<table>
+    <tr><th>Sintoma</th><th>Solução</th></tr>
+    <tr><td><code>java</code> ou <code>mvn</code> “não é reconhecido”</td><td>Abra um terminal novo depois de instalar. No Windows, confirme o <b>Path</b> e o <b>JAVA_HOME</b>.</td></tr>
+    <tr><td>Windows: “Neither the JAVA_HOME nor the JRE_HOME environment variable is defined”</td><td>Defina a variável com a pasta onde o JDK foi instalado e abra uma Linha de Comandos nova, por exemplo:<br><code>setx JAVA_HOME "C:\Program Files\Eclipse Adoptium\jdk-17.0.13.11-hotspot"</code></td></tr>
+    <tr><td>“Address already in use” / porta 8081 ocupada</td><td>Já há um Tomcat a correr. Pare-o (<kbd>Ctrl</kbd>+<kbd>C</kbd> ou <code>shutdown.sh</code> / <code>shutdown.bat</code>) ou escolha outra porta em <code>server.xml</code>.</td></tr>
+    <tr><td>Página 404 em <code>/agrogest/</code></td><td>Confirme que <code>agrogest.war</code> está em <code>webapps</code> e aguarde alguns segundos pelo deploy. Veja <code>logs/catalina.*.log</code>.</td></tr>
+    <tr><td>Aparece um aspeto ou dados antigos</td><td>Recarregue com <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> no Mac). Para voltar aos dados de demonstração: <b>Persistência → Eliminar ficheiro</b> e reiniciar o Tomcat.</td></tr>
+    <tr><td>Erro de compilação “release 17 not supported”</td><td>O Maven está a usar um Java antigo. Instale o JDK 17+ e confirme com <code>mvn -v</code>.</td></tr>
+</table>
+
+<h2>3. Entrar no sistema</h2>
 <figure><img src="img/01-login.png" alt=""><figcaption>Figura 1 — Página de entrada.</figcaption></figure>
 <ol class="passos">
     <li>Abra <code>http://&lt;servidor&gt;:8081/agrogest/</code> no navegador.</li>
@@ -91,9 +187,9 @@
 <div class="nota">Se tentar abrir uma página protegida sem sessão, o sistema pede o login e, depois de entrar, leva-o de volta à página pedida.
     Um cliente que tente abrir uma página <code>/admin/…</code> recebe a mensagem <b>403 — Acesso negado</b>.</div>
 
-<h2>3. Módulo Cliente</h2>
+<h2>4. Módulo Cliente</h2>
 
-<h3>3.1 Criar conta (auto-registo)</h3>
+<h3>4.1 Criar conta (auto-registo)</h3>
 <figure><img src="img/02-registo.png" alt=""><figcaption>Figura 2 — Criar conta de cliente.</figcaption></figure>
 <ol class="passos">
     <li>Na página de entrada clique em <b>Registe-se como cliente</b>.</li>
@@ -103,20 +199,20 @@
 </ol>
 <p>O email é único. Se já existir uma conta com esse email, o sistema avisa e mantém os dados preenchidos.</p>
 
-<h3>3.2 Consultar o catálogo</h3>
+<h3>4.2 Consultar o catálogo</h3>
 <figure><img src="img/03-catalogo.png" alt=""><figcaption>Figura 3 — Catálogo com filtro por categoria.</figcaption></figure>
 <p>Cada produto mostra a fotografia, categoria, nome, descrição, fornecedor, quantidade disponível, validade e preço por unidade.
     Use os botões <b>Todas / Semente / Fertilizante / Maquinaria / Ferramenta</b> para filtrar.
     Só aparecem produtos com stock e dentro da validade.</p>
 
-<h3>3.3 Adicionar ao carrinho</h3>
+<h3>4.3 Adicionar ao carrinho</h3>
 <ol class="passos">
     <li>No cartão do produto escreva a <b>quantidade</b> (ex.: 3 kg de <i>Semente de Milho Matuba</i>) e clique em <b>Adicionar</b>.</li>
     <li>Repita para outros produtos (ex.: 1 saco de <i>Adubo Nitrato de Amónio 33,5% N</i>). O contador junto a <b>Carrinho</b> no menu mostra o número de linhas.</li>
 </ol>
 <p>Se pedir mais do que o stock disponível, o sistema recusa e indica quantas unidades existem.</p>
 
-<h3>3.4 Gerir o carrinho</h3>
+<h3>4.4 Gerir o carrinho</h3>
 <figure><img src="img/04-carrinho.png" alt=""><figcaption>Figura 4 — Carrinho com subtotal, IVA e total.</figcaption></figure>
 <ul>
     <li><b>Alterar quantidade:</b> mude o número e clique em <b>Atualizar</b> (0 remove a linha).</li>
@@ -125,7 +221,7 @@
 </ul>
 <p>O carrinho fica guardado na sessão: pode voltar ao catálogo e continuar a comprar.</p>
 
-<h3>3.5 Finalizar a compra e emitir a factura</h3>
+<h3>4.5 Finalizar a compra e emitir a factura</h3>
 <figure><img src="img/05-compra.png" alt=""><figcaption>Figura 5 — Confirmação da compra.</figcaption></figure>
 <ol class="passos">
     <li>No carrinho clique em <b>Finalizar compra</b>.</li>
@@ -137,24 +233,24 @@
     e aparece a lista de produtos em falta. Se tudo estiver disponível, o stock é descontado e a factura é emitida com número sequencial
     (<code>FT-2026-1</code>, <code>FT-2026-2</code>, …).</p>
 
-<h3>3.6 Ver e imprimir a factura</h3>
+<h3>4.6 Ver e imprimir a factura</h3>
 <figure><img src="img/06-factura.png" alt=""><figcaption>Figura 6 — Factura com dados do cliente, itens, subtotal, IVA 16% e total.</figcaption></figure>
 <p>Clique em <b>Imprimir factura</b> (ou <kbd>Ctrl</kbd>+<kbd>P</kbd>). A impressão mostra só a factura, sem menus nem botões.
     Para gerar um PDF, escolha <i>Guardar como PDF</i> na janela de impressão.</p>
 
-<h3>3.7 Histórico de compras</h3>
+<h3>4.7 Histórico de compras</h3>
 <figure><img src="img/07-minhas-compras.png" alt=""><figcaption>Figura 7 — Minhas compras.</figcaption></figure>
 <p>Em <b>Minhas compras</b> estão todas as compras anteriores, das mais recentes para as mais antigas. <b>Ver factura</b> abre a factura correspondente.
     Cada cliente só consegue ver as suas próprias facturas.</p>
 
-<h2>4. Módulo Administrador</h2>
+<h2>5. Módulo Administrador</h2>
 
-<h3>4.1 Painel</h3>
+<h3>5.1 Painel</h3>
 <figure><img src="img/10-dashboard.png" alt=""><figcaption>Figura 8 — Painel do administrador.</figcaption></figure>
 <p>Mostra o número de fornecedores, produtos, clientes, vendas e campanhas (cada indicador é uma ligação para a área respetiva),
     o total facturado, o valor das colheitas, as últimas 5 vendas e os produtos com stock abaixo de 20 unidades.</p>
 
-<h3>4.2 Fornecedores</h3>
+<h3>5.2 Fornecedores</h3>
 <figure><img src="img/11-fornecedores.png" alt=""><figcaption>Figura 9 — Gestão de fornecedores.</figcaption></figure>
 <ol class="passos">
     <li>Menu <b>Fornecedores</b>.</li>
@@ -163,7 +259,7 @@
 </ol>
 <p>Um fornecedor com produtos associados não pode ser removido. Remova primeiro os produtos.</p>
 
-<h3>4.3 Produtos</h3>
+<h3>5.3 Produtos</h3>
 <figure><img src="img/12-produtos.png" alt=""><figcaption>Figura 10 — Criar produto, repor stock e alterar preço.</figcaption></figure>
 <ol class="passos">
     <li>Menu <b>Produtos</b>.</li>
@@ -176,7 +272,7 @@
 </ol>
 <p>Os produtos fora da validade ficam assinalados a vermelho e deixam de aparecer no catálogo do cliente.</p>
 
-<h3>4.4 Campanhas</h3>
+<h3>5.4 Campanhas</h3>
 <figure><img src="img/13-campanhas.png" alt=""><figcaption>Figura 11 — Campanhas agrícolas.</figcaption></figure>
 <ol class="passos">
     <li>Menu <b>Campanhas</b>. Indique o <b>nome</b> (ex.: <i>Campanha 2026/2027</i>), a <b>data de início</b> (01/10/2026) e a <b>data de fim</b> (30/06/2027).</li>
@@ -185,7 +281,7 @@
 </ol>
 <p>O botão <b>Remover</b> fica inativo enquanto a campanha tiver cultivos associados.</p>
 
-<h3>4.5 Cultivos</h3>
+<h3>5.5 Cultivos</h3>
 <figure><img src="img/14-cultivos.png" alt=""><figcaption>Figura 12 — Registo de cultivos por campanha.</figcaption></figure>
 <ol class="passos">
     <li>Menu <b>Cultivos</b>. Escolha a <b>campanha</b> (só as abertas estão disponíveis).</li>
@@ -194,7 +290,7 @@
 </ol>
 <p>Um cultivo com colheitas registadas não pode ser removido.</p>
 
-<h3>4.6 Colheitas</h3>
+<h3>5.6 Colheitas</h3>
 <figure><img src="img/15-colheitas.png" alt=""><figcaption>Figura 13 — Colheitas com valor total calculado.</figcaption></figure>
 <ol class="passos">
     <li>Menu <b>Colheitas</b>. Escolha o <b>cultivo</b>, a <b>data</b>, a <b>quantidade em kg</b> (3200) e o <b>preço por kg</b> (22).</li>
@@ -202,18 +298,18 @@
 </ol>
 <p>A data da colheita não pode ser anterior à data de plantio do cultivo.</p>
 
-<h3>4.7 Listagens</h3>
+<h3>5.7 Listagens</h3>
 <figure><img src="img/17-listagem-produtos.png" alt=""><figcaption>Figura 14 — Listagem de produtos ordenada por preço (decrescente).</figcaption></figure>
 <p>Menu <b>Listagens</b>, com os separadores <b>Produtos</b>, <b>Fornecedores</b>, <b>Clientes</b>, <b>Armazém</b> (só produtos com stock &gt; 0 e o valor total em stock)
     e <b>Compras detalhadas</b>. Clique no título de uma coluna para ordenar (nome, preço, stock, data, valor).
     Um segundo clique inverte a ordem (▲ crescente, ▼ decrescente). Em <b>Clientes</b> pode também <b>ativar/desativar</b> contas.</p>
 
-<h3>4.8 Compras detalhadas</h3>
+<h3>5.8 Compras detalhadas</h3>
 <figure><img src="img/16-compras.png" alt=""><figcaption>Figura 15 — Compras com todos os dados.</figcaption></figure>
 <p>Cada compra mostra o cliente, o endereço, o telefone, os produtos, as quantidades, o valor unitário, o subtotal, o IVA, o total e a data.
     O número da factura é uma ligação para a factura imprimível. Pode ordenar por data, valor ou cliente.</p>
 
-<h3>4.9 Relatórios</h3>
+<h3>5.9 Relatórios</h3>
 <figure><img src="img/18-relatorios.png" alt=""><figcaption>Figura 16 — Relatórios de clientes.</figcaption></figure>
 <ul>
     <li><b>Clientes ordenados por nome</b> (A→Z).</li>
@@ -222,7 +318,7 @@
     <li><b>Clientes sem compras</b>.</li>
 </ul>
 
-<h3>4.10 Persistência</h3>
+<h3>5.10 Persistência</h3>
 <figure><img src="img/19-persistencia.png" alt=""><figcaption>Figura 17 — Gravação manual do estado.</figcaption></figure>
 <p>O estado é <b>gravado automaticamente</b> quando o Tomcat é encerrado e <b>restaurado</b> quando volta a arrancar. Neste menu também pode:</p>
 <ul>
@@ -231,7 +327,7 @@
     <li><b>Eliminar ficheiro</b>: apaga o ficheiro e o backup. No próximo arranque sem ficheiro são carregados os dados de demonstração.</li>
 </ul>
 
-<h2>5. Mensagens frequentes</h2>
+<h2>6. Mensagens frequentes</h2>
 <table>
     <tr><th>Mensagem</th><th>Significado / o que fazer</th></tr>
     <tr><td>Email ou palavra-passe incorretos</td><td>Verifique os dados. As palavras-passe distinguem maiúsculas de minúsculas.</td></tr>
@@ -243,20 +339,6 @@
     <tr><td>A campanha … está fechada</td><td>Reabra a campanha antes de registar cultivos.</td></tr>
     <tr><td>403 — Acesso negado</td><td>A página é reservada a outro perfil (ex.: cliente em <code>/admin</code>, ou factura de outro cliente).</td></tr>
 </table>
-
-<h2>6. Instalação rápida</h2>
-<p>Detalhes completos no <code>README.md</code>.</p>
-<h3>Compilar</h3>
-<p><code>mvn clean package</code> gera <code>target/agrogest.war</code> e corre os testes automáticos.</p>
-<h3>Local</h3>
-<ol class="passos">
-    <li>Instalar o JDK 17 e o Tomcat 10.1. Em <code>conf/server.xml</code> mudar <code>port="8080"</code> para <code>port="8081"</code>.</li>
-    <li>Copiar <code>agrogest.war</code> para <code>webapps/</code> e executar <code>bin/startup.sh</code> (ou <code>startup.bat</code>).</li>
-    <li>Abrir <code>http://localhost:8081/agrogest/</code>.</li>
-</ol>
-<h3>Servidor Linux (systemd)</h3>
-<p><code>sudo ./deploy/instalar.sh dist/agrogest.war</code>. Depois use
-    <code>sudo systemctl start|stop|restart|status tomcat</code> e <code>journalctl -u tomcat -f</code>.</p>
 
 </body>
 </html>
