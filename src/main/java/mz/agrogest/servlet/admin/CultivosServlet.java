@@ -15,6 +15,7 @@ import mz.agrogest.service.NegocioException;
 import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Params;
 
+/** Registo de cultivos por campanha, com filtro opcional por campanha. */
 @WebServlet("/admin/cultivos")
 public class CultivosServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

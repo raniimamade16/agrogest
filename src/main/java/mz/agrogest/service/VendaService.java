@@ -17,9 +17,12 @@ import mz.agrogest.model.VendaItem;
 import mz.agrogest.repo.DataStore;
 
 /**
- * Vendas e facturação. A finalização da compra é uma transação lógica:
- * verifica o stock de TODOS os itens e só depois desconta — tudo ou nada —
- * dentro de um bloco {@code synchronized} no DataStore.
+ * O coração da parte comercial: verificar o stock, finalizar compras e emitir facturas.
+ *
+ * A finalização da compra é uma "transação lógica". Como não temos base de dados com transações,
+ * garantimos o "tudo ou nada" desta forma: dentro de um bloco synchronized, primeiro verificamos o
+ * stock de TODOS os produtos do carrinho e só se estiver tudo bem é que começamos a descontar.
+ * Como essa segunda fase já não tem nada que possa falhar, nunca fica uma venda a meio.
  */
 public class VendaService {
 
@@ -30,8 +33,10 @@ public class VendaService {
     }
 
     /**
-     * Lista os problemas que impedem a compra (produto removido, expirado ou stock insuficiente).
-     * Lista vazia = pode comprar.
+     * Verifica se todos os produtos do carrinho ainda podem ser vendidos. Devolve uma mensagem por cada
+     * problema encontrado; se a lista vier vazia, a compra pode avançar.
+     * Usamos sempre o produto atual do DataStore, e não o que está guardado no carrinho, porque o stock
+     * pode ter mudado desde que o cliente adicionou o produto.
      */
     public List<String> verificarDisponibilidade(Carrinho carrinho) {
         List<String> problemas = new ArrayList<>();
@@ -50,18 +55,20 @@ public class VendaService {
         return problemas;
     }
 
+    /** Finaliza a compra: desconta o stock de todos os produtos e cria a venda (factura). */
     public Venda finalizarCompra(Utilizador cliente, Carrinho carrinho) {
         if (carrinho.isVazio()) {
             throw new NegocioException("O carrinho está vazio.");
         }
         Venda venda;
         synchronized (store) {
-            // Fase 1: validar tudo (nenhuma alteração ainda)
+            // Fase 1: só validar. Se houver algum problema, a exceção sai daqui e nada foi alterado.
             List<String> problemas = verificarDisponibilidade(carrinho);
             if (!problemas.isEmpty()) {
                 throw new NegocioException("Compra não efetuada: produtos indisponíveis.", problemas);
             }
-            // Fase 2: descontar stock e criar a venda (já não há validações que possam falhar)
+            // Fase 2: descontar o stock e criar a venda. Daqui para a frente já não há nada que possa
+            // falhar, por isso ou a compra fica completa ou nem sequer começou.
             venda = new Venda();
             for (ItemCarrinho item : carrinho.getItens()) {
                 Produto p = store.produto(item.getProduto().getId()).orElseThrow();
@@ -75,11 +82,14 @@ public class VendaService {
             venda.setNumeroFactura(numeroFactura(venda));
             store.adicionar(venda);
         }
+        // O carrinho só é esvaziado depois de a venda estar registada.
         carrinho.esvaziar();
         return venda;
     }
 
-    /** Factura: o cliente só vê as suas; o admin vê todas (RN c). */
+    /**
+     * Devolve uma factura, respeitando a regra c) do enunciado: o cliente só vê as suas e o administrador vê todas.
+     */
     public Venda obterFactura(Utilizador u, int vendaId) {
         Venda v = store.venda(vendaId).orElseThrow(() -> new NegocioException("Factura não encontrada."));
         if (!u.isAdmin() && v.getClienteId() != u.getId()) {
@@ -88,6 +98,7 @@ public class VendaService {
         return v;
     }
 
+    /** Histórico de compras de um cliente, da mais recente para a mais antiga. */
     public List<Venda> comprasDoCliente(int clienteId) {
         return store.vendas().stream()
                 .filter(v -> v.getClienteId() == clienteId)
@@ -95,10 +106,12 @@ public class VendaService {
                 .collect(Collectors.toList());
     }
 
+    /** Soma do total (com IVA) de todas as vendas, mostrada no painel. */
     public BigDecimal totalFacturado() {
         return store.vendas().stream().map(Venda::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /** Copia para a venda os dados do cliente nesse momento: nome, email, telefone e morada. */
     static void preencherCliente(Venda v, Utilizador c) {
         v.setClienteId(c.getId());
         v.setClienteNome(c.getNome());
@@ -107,7 +120,7 @@ public class VendaService {
         v.setClienteEndereco(c.getEndereco());
     }
 
-    /** FT-&lt;ano&gt;-&lt;sequencial&gt;, ex.: FT-2026-1 */
+    /** Número da factura no formato FT-ano-sequencial, por exemplo FT-2026-1. */
     static String numeroFactura(Venda v) {
         return "FT-" + v.getData().getYear() + "-" + v.getId();
     }

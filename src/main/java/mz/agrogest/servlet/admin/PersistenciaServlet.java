@@ -14,7 +14,7 @@ import mz.agrogest.service.NegocioException;
 import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Params;
 
-/** Endpoint de gravação / restauro / eliminação manual do ficheiro de dados. */
+/** Endpoint pedido no enunciado para gravar, restaurar ou eliminar manualmente o ficheiro de dados. */
 @WebServlet("/admin/persistencia")
 public class PersistenciaServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
@@ -60,6 +60,9 @@ public class PersistenciaServlet extends BaseServlet {
         });
     }
 
+    /**
+     * O objeto Persistencia é criado pelo AppListener no arranque e fica guardado no contexto da aplicação.
+     */
     private Persistencia persistencia() {
         return (Persistencia) getServletContext().getAttribute(AppListener.PERSISTENCIA);
     }

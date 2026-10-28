@@ -14,7 +14,7 @@ import mz.agrogest.model.TipoFornecedor;
 import mz.agrogest.repo.DataStore;
 import mz.agrogest.util.Ordenacao;
 
-/** Fornecedores e produtos. */
+/** Regras de negócio dos fornecedores e dos produtos (o catálogo). */
 public class CatalogoService {
 
     private final DataStore store;
@@ -23,7 +23,7 @@ public class CatalogoService {
         this.store = store;
     }
 
-    // ---------- fornecedores ----------
+    // Fornecedores
 
     public Fornecedor criarFornecedor(String nome, TipoFornecedor tipo, String contacto, String provincia) {
         Fornecedor f = new Fornecedor(store.proximoIdFornecedor(), nome, tipo, contacto, provincia);
@@ -31,6 +31,10 @@ public class CatalogoService {
         return f;
     }
 
+    /**
+     * Só deixamos remover um fornecedor sem produtos. Caso contrário ficavam produtos
+     * a apontar para um fornecedor que já não existe.
+     */
     public void removerFornecedor(int id) {
         synchronized (store) {
             long nProdutos = store.produtos().stream().filter(p -> p.getFornecedorId() == id).count();
@@ -44,12 +48,16 @@ public class CatalogoService {
         }
     }
 
+    /** Mapa id -> fornecedor. As JSP usam-no para mostrar o nome do fornecedor de cada produto. */
     public Map<Integer, Fornecedor> fornecedoresPorId() {
         return store.fornecedores().stream().collect(Collectors.toMap(Fornecedor::getId, Function.identity()));
     }
 
-    // ---------- produtos ----------
+    // Produtos
 
+    /**
+     * Cria um produto depois de confirmar que o fornecedor existe e que o preço e a quantidade fazem sentido.
+     */
     public Produto criarProduto(String nome, Categoria categoria, int fornecedorId, BigDecimal preco,
                                 int quantidade, String unidade, String descricao, String foto, LocalDate validade) {
         if (store.fornecedor(fornecedorId).isEmpty()) {
@@ -66,8 +74,10 @@ public class CatalogoService {
     }
 
     /**
-     * Atualiza um produto: repõe stock (soma {@code reposicao}) e, opcionalmente, altera o preço.
-     * Corre sob o mesmo lock das vendas para não perder atualizações de stock.
+     * Repõe stock (soma a quantidade indicada à que já existe) e, se for indicado, muda o preço.
+     *
+     * Corre dentro do mesmo synchronized que as vendas. Sem isso, uma reposição e uma venda ao
+     * mesmo tempo podiam ler o mesmo valor de stock e uma das duas alterações perdia-se.
      */
     public void atualizarProduto(int id, int reposicao, BigDecimal novoPreco) {
         if (reposicao < 0) {
@@ -83,6 +93,9 @@ public class CatalogoService {
         }
     }
 
+    /**
+     * Remove um produto. As facturas antigas não são afetadas, porque guardam uma cópia do nome e do preço.
+     */
     public void removerProduto(int id) {
         synchronized (store) {
             if (!store.removerProduto(id)) {
@@ -95,7 +108,10 @@ public class CatalogoService {
         return store.produto(id).orElseThrow(() -> new NegocioException("Produto não encontrado."));
     }
 
-    /** Catálogo do cliente: produtos com stock e dentro da validade, filtrados por categoria (opcional). */
+    /**
+     * Produtos que o cliente pode comprar: com stock, dentro da validade e, se for escolhida,
+     * de uma só categoria. Vêm ordenados por nome.
+     */
     public List<Produto> catalogo(Categoria categoria) {
         return store.produtos().stream()
                 .filter(p -> p.getQuantidade() > 0 && !p.isExpirado())

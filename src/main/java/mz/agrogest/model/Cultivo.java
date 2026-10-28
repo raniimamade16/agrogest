@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Uma cultura semeada numa campanha, por exemplo 8 hectares de feijão nhemba da variedade Macia.
+ * Está ligado à campanha pelo campanhaId e pode ter várias colheitas.
+ */
 public class Cultivo implements Serializable {
     private static final long serialVersionUID = 1L;
 

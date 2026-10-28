@@ -13,7 +13,11 @@ import mz.agrogest.model.Produto;
 import mz.agrogest.model.Utilizador;
 import mz.agrogest.model.Venda;
 
-/** Estado completo do sistema, tal como é gravado no ficheiro .ser. */
+/**
+ * Tudo o que é preciso guardar no ficheiro .ser: as listas de todas as entidades e o valor
+ * atual de cada contador de IDs. Os contadores são importantes: se não os guardássemos, depois
+ * de reiniciar o sistema voltaria a gerar IDs (e números de factura) que já existem.
+ */
 public class Snapshot implements Serializable {
     private static final long serialVersionUID = 1L;
 

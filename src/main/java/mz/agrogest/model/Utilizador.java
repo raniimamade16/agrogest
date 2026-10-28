@@ -3,15 +3,23 @@ package mz.agrogest.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * Representa qualquer pessoa que entra no sistema, seja o administrador ou um cliente.
+ *
+ * Usamos uma só classe para os dois perfis porque os dados são praticamente os mesmos;
+ * o que muda é o campo "perfil", que o AuthFilter consulta para decidir o que cada um pode abrir.
+ * É Serializable porque fica guardado na sessão HTTP e também no ficheiro de dados.
+ */
 public class Utilizador implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int id;
     private String nome;
     private String email;
-    /** Hash PBKDF2 da palavra-passe (nunca texto puro). */
+    /** Só guardamos o hash da palavra-passe (PBKDF2), nunca o texto original. Ver PasswordUtil. */
     private String passwordHash;
     private Perfil perfil;
+    // Um cliente desativado pelo administrador deixa de conseguir entrar, mas o seu histórico mantém-se.
     private boolean ativo = true;
     private String telefone;
     private String endereco;
@@ -31,6 +39,7 @@ public class Utilizador implements Serializable {
         this.endereco = endereco;
     }
 
+    /** Atalho usado no filtro de acesso e nas JSP (por exemplo, ${eu.admin}). */
     public boolean isAdmin() {
         return perfil == Perfil.ADMIN;
     }

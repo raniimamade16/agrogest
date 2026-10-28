@@ -23,6 +23,10 @@ import mz.agrogest.model.Utilizador;
 import mz.agrogest.model.Venda;
 import mz.agrogest.repo.DataStore;
 
+/**
+ * Testes automáticos das regras mais importantes das vendas: cálculo do IVA, venda "tudo ou nada",
+ * compras em simultâneo, facturas privadas e email único. Correm com "mvn test" e também no "mvn package".
+ */
 class VendaServiceTest {
 
     private final DataStore store = DataStore.get();
@@ -34,6 +38,7 @@ class VendaServiceTest {
     private Produto adubo;
     private Utilizador cliente;
 
+    /** Antes de cada teste limpamos o DataStore e criamos um cenário pequeno e conhecido. */
     @BeforeEach
     void preparar() {
         store.limpar();
@@ -64,7 +69,7 @@ class VendaServiceTest {
     void stockInsuficienteNumItemNaoDescontaNenhum() {
         Carrinho c = new Carrinho();
         c.adicionar(milho, 3);
-        c.adicionar(adubo, 5); // só há 1
+        c.adicionar(adubo, 5); // pede 5 sacos, mas só há 1 em stock
 
         NegocioException e = assertThrows(NegocioException.class, () -> vendas.finalizarCompra(cliente, c));
 
@@ -76,8 +81,10 @@ class VendaServiceTest {
 
     @Test
     void comprasConcorrentesNuncaVendemMaisQueOStock() throws Exception {
-        int threads = 50; // 50 clientes tentam comprar 1 kg cada; só há 10 kg
+        int threads = 50; // 50 clientes tentam comprar 1 kg cada, mas só há 10 kg em stock
         ExecutorService pool = Executors.newFixedThreadPool(16);
+        // O CountDownLatch funciona como um tiro de partida: as threads ficam todas à espera
+        // e arrancam ao mesmo tempo, para provocar o máximo de concorrência possível.
         CountDownLatch partida = new CountDownLatch(1);
         List<Future<Boolean>> resultados = new ArrayList<>();
         for (int i = 0; i < threads; i++) {

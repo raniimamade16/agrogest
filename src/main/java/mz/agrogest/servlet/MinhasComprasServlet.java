@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/** Histórico de compras do cliente com sessão iniciada. */
 @WebServlet("/minhas-compras")
 public class MinhasComprasServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

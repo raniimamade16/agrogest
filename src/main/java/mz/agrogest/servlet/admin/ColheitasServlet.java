@@ -15,6 +15,7 @@ import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Formatos;
 import mz.agrogest.util.Params;
 
+/** Registo de colheitas. O valor total (kg x preço por kg) é calculado pelo próprio modelo Colheita. */
 @WebServlet("/admin/colheitas")
 public class ColheitasServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

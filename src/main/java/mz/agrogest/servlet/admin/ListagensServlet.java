@@ -21,7 +21,9 @@ import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Ordenacao;
 
 /**
- * Listagens ordenáveis: ?tipo=produtos|fornecedores|clientes|armazem|compras&ordem=campo&dir=asc|desc
+ * Listagens do administrador, todas na mesma página, com separadores.
+ * O tipo de listagem e a ordenação vêm no endereço, por exemplo /admin/listagens?tipo=produtos&ordem=preco&dir=desc.
+ * Para cada tipo existe um mapa "nome do campo -> Comparator", o que torna fácil acrescentar novas colunas ordenáveis.
  */
 @WebServlet("/admin/listagens")
 public class ListagensServlet extends BaseServlet {
@@ -79,7 +81,7 @@ public class ListagensServlet extends BaseServlet {
             case "compras" -> {
                 List<Venda> l = store.vendas();
                 if (ordem == null) {
-                    dir = "desc"; // por omissão: mais recentes primeiro
+                    dir = "desc"; // se não for pedida nenhuma ordem, mostramos as compras mais recentes primeiro
                 }
                 usado = Ordenacao.ordenar(l, ordem, dir, ORDEM_COMPRAS, "data");
                 req.setAttribute("lista", l);
@@ -107,6 +109,7 @@ public class ListagensServlet extends BaseServlet {
         render(req, res, "admin/listagens");
     }
 
+    /** Valor do stock de um produto (preço x quantidade), usado no separador Armazém. */
     private static BigDecimal valorEmStock(Produto p) {
         return p.getPreco().multiply(BigDecimal.valueOf(p.getQuantidade()));
     }

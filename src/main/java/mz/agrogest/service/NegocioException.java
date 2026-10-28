@@ -2,7 +2,13 @@ package mz.agrogest.service;
 
 import java.util.List;
 
-/** Violação de uma regra de negócio; a mensagem é mostrada ao utilizador. */
+/**
+ * Lançada quando uma regra de negócio é violada, por exemplo stock insuficiente ou email repetido.
+ * A mensagem é escrita para o utilizador final e aparece no ecrã. A lista de detalhes serve para
+ * mostrar vários problemas de uma vez (por exemplo, um por cada produto do carrinho).
+ *
+ * É uma RuntimeException para não obrigar a declarar "throws" em todos os métodos.
+ */
 public class NegocioException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

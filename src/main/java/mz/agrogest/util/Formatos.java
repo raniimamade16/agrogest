@@ -9,8 +9,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 
 /**
- * Formatação para as vistas. Expostas às JSP como funções EL
- * (ver /WEB-INF/agrogest.tld, prefixo {@code ag}).
+ * Funções de formatação usadas nas JSP: datas, dinheiro em meticais e números.
+ * Estão registadas como funções EL no ficheiro /WEB-INF/agrogest.tld, por isso nas JSP escrevemos,
+ * por exemplo, ${ag:mt(produto.preco)}. Precisámos delas porque a JSTL não sabe formatar LocalDate
+ * e queríamos o formato usado em Moçambique: ponto nos milhares e vírgula nas décimas.
  */
 public final class Formatos {
 
@@ -21,6 +23,10 @@ public final class Formatos {
     private Formatos() {
     }
 
+    /**
+     * Cria o formatador com ponto nos milhares e vírgula nas décimas.
+     * Criamos um novo de cada vez porque o DecimalFormat não pode ser partilhado entre threads.
+     */
     private static DecimalFormat formato(String padrao) {
         DecimalFormatSymbols s = new DecimalFormatSymbols();
         s.setDecimalSeparator(',');
@@ -28,16 +34,17 @@ public final class Formatos {
         return new DecimalFormat(padrao, s);
     }
 
-    /** 70400 → "70.400,00 MT" */
+    /** Formata dinheiro: 70400 fica "70.400,00 MT". */
     public static String mt(Object valor) {
         return valor == null ? "" : formato("#,##0.00").format(valor) + " MT";
     }
 
-    /** 8.5 → "8,5" ; 3200 → "3.200" */
+    /** Formata números sem casas decimais a mais: 8.5 fica "8,5" e 3200 fica "3.200". */
     public static String num(Object valor) {
         return valor == null ? "" : formato("#,##0.##").format(valor);
     }
 
+    /** Data no formato dd/mm/aaaa. Aceita LocalDate e LocalDateTime. */
     public static String data(Object t) {
         if (t instanceof LocalDateTime ldt) {
             return DATA.format(ldt);
@@ -45,16 +52,20 @@ public final class Formatos {
         return t instanceof Temporal tmp ? DATA.format(tmp) : "";
     }
 
+    /** Data e hora no formato dd/mm/aaaa hh:mm. */
     public static String dataHora(Object t) {
         return t instanceof LocalDateTime ldt ? DATA_HORA.format(ldt) : data(t);
     }
 
-    /** Valor para {@code <input type="date">}. */
+    /** Data no formato aaaa-mm-dd, que é o que o <input type="date"> do HTML espera. */
     public static String iso(Object t) {
         return t instanceof LocalDate ld ? ISO.format(ld) : "";
     }
 
-    /** URL absoluto fica como está; caminho relativo é prefixado com o contexto da aplicação. */
+    /**
+     * Endereço da fotografia de um produto. Um URL completo fica como está; um caminho relativo
+     * recebe o contexto da aplicação à frente. Sem foto, usamos uma imagem genérica.
+     */
     public static String foto(String url, String contexto) {
         if (url == null || url.isBlank()) {
             return contexto + "/img/sem-foto.svg";
@@ -65,6 +76,7 @@ public final class Formatos {
         return contexto + "/" + url;
     }
 
+    /** Converte o valor escrito num formulário em número, aceitando vírgula ou ponto ("22,50" ou "22.50"). */
     public static BigDecimal dinheiro(String s) {
         return new BigDecimal(s.trim().replace(" ", "").replace(",", "."));
     }

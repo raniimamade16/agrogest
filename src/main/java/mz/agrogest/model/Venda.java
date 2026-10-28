@@ -7,16 +7,24 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Uma compra feita por um cliente. Cada venda é também a sua factura.
+ *
+ * O subtotal, o IVA e o total não são guardados: são calculados a partir das linhas (itens).
+ * Desta forma é impossível os totais ficarem diferentes da soma dos produtos.
+ */
 public class Venda implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // Taxa de IVA aplicada em Moçambique.
     public static final BigDecimal TAXA_IVA = new BigDecimal("0.16");
 
     private int id;
     private String numeroFactura;
     private LocalDateTime data;
     private int clienteId;
-    // Dados do cliente copiados no momento da compra (a factura é um documento fixo)
+    // Dados do cliente copiados no momento da compra. Uma factura é um documento fixo:
+    // se o cliente mudar de morada mais tarde, as facturas antigas não devem mudar.
     private String clienteNome;
     private String clienteEmail;
     private String clienteTelefone;
@@ -30,6 +38,7 @@ public class Venda implements Serializable {
         return itens.stream().map(VendaItem::getSubtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /** IVA de 16% sobre o subtotal, arredondado aos centavos como numa factura real. */
     public BigDecimal getIva() {
         return getSubtotal().multiply(TAXA_IVA).setScale(2, RoundingMode.HALF_UP);
     }

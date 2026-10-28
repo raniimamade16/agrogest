@@ -15,22 +15,26 @@ import mz.agrogest.service.AuthService;
 import mz.agrogest.util.DadosIniciais;
 
 /**
- * Ciclo de vida da aplicação:
- * arranque → restaura o estado do ficheiro (ou carrega dados de demonstração) e garante a conta admin;
- * encerramento do Tomcat → grava automaticamente o estado.
+ * Corre quando a aplicação arranca e quando pára (é um ServletContextListener).
+ * - No arranque: tenta restaurar os dados do ficheiro .ser. Se ainda não houver ficheiro (primeira vez),
+ *   carrega os dados de demonstração. Garante também que a conta de administrador existe.
+ * - Quando o Tomcat encerra: grava automaticamente todo o estado no ficheiro.
  */
 @WebListener
 public class AppListener implements ServletContextListener {
 
+    /** Nome do atributo onde fica o objeto Persistencia, para o PersistenciaServlet o poder usar. */
     public static final String PERSISTENCIA = "persistencia";
     private static final Logger LOG = Logger.getLogger(AppListener.class.getName());
 
+    /** Chamado uma vez, quando o Tomcat arranca a aplicação. */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ServletContext ctx = sce.getServletContext();
         Persistencia persistencia = new Persistencia(pastaDados(ctx));
         ctx.setAttribute(PERSISTENCIA, persistencia);
-        // muda a cada arranque/deploy: as JSP acrescentam ?v=... ao CSS para o navegador não usar a cópia antiga
+        // Número de versão que muda a cada arranque. As JSP juntam-no ao endereço do CSS (style.css?v=...)
+        // para o navegador ir buscar a versão nova depois de cada atualização.
         ctx.setAttribute("versao", Long.toString(System.currentTimeMillis(), 36));
 
         DataStore store = DataStore.get();
@@ -42,6 +46,7 @@ public class AppListener implements ServletContextListener {
         LOG.info("AgroGest iniciado. Ficheiro de dados: " + persistencia.getFicheiro());
     }
 
+    /** Chamado quando o Tomcat encerra (ou a aplicação é republicada): gravamos tudo antes de sair. */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         Persistencia persistencia = (Persistencia) sce.getServletContext().getAttribute(PERSISTENCIA);
@@ -53,8 +58,10 @@ public class AppListener implements ServletContextListener {
     }
 
     /**
-     * Pasta dos dados, por ordem de prioridade: propriedade de sistema {@code agrogest.dados},
-     * context-param {@code agrogest.dados}, {@code $CATALINA_BASE/agrogest-dados}, {@code ~/agrogest-dados}.
+     * Decide em que pasta fica o ficheiro de dados, por esta ordem:
+     * 1. a propriedade de sistema -Dagrogest.dados (usada no serviço systemd);
+     * 2. o context-param agrogest.dados do web.xml;
+     * 3. a pasta agrogest-dados dentro da instalação do Tomcat (ou, em último caso, na pasta pessoal).
      */
     private static Path pastaDados(ServletContext ctx) {
         String p = System.getProperty("agrogest.dados");

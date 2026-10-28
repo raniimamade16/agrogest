@@ -16,6 +16,7 @@ import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Ordenacao;
 import mz.agrogest.util.Params;
 
+/** Gestão de produtos: criar, repor stock ou alterar o preço, e remover. */
 @WebServlet("/admin/produtos")
 public class ProdutosServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
@@ -48,6 +49,7 @@ public class ProdutosServlet extends BaseServlet {
                         Params.opcional(req, "descricao"),
                         Params.opcional(req, "foto"),
                         validade.isEmpty() ? null : Params.data(req, "validade", "Validade"));
+                // Deixamos criar, mas avisamos: um produto já expirado não aparece no catálogo.
                 if (p.getValidade() != null && p.getValidade().isBefore(LocalDate.now())) {
                     yield "Produto \"" + p.getNome() + "\" criado (atenção: a validade já expirou, não aparecerá no catálogo).";
                 }

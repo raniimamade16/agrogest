@@ -16,16 +16,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Grava/restaura o {@link DataStore} num ficheiro com serialização Java.
+ * Grava o estado da aplicação num ficheiro e volta a lê-lo, usando a serialização do Java
+ * (ObjectOutputStream e ObjectInputStream).
  *
- * Tolerância a falhas:
- * <ol>
- *   <li>escreve primeiro para {@code agrogest.ser.tmp} e força o flush para disco (fsync);</li>
- *   <li>a versão anterior passa a {@code agrogest.ser.bak};</li>
- *   <li>o .tmp é renomeado atomicamente para {@code agrogest.ser}.</li>
- * </ol>
- * Se o Tomcat morrer a meio da escrita, o ficheiro principal fica intacto; se o
- * principal estiver corrompido, o arranque tenta a cópia .bak.
+ * Para a gravação ser tolerante a falhas, nunca escrevemos diretamente por cima do ficheiro bom:
+ * 1. escrevemos tudo para agrogest.ser.tmp e pedimos ao sistema operativo que passe os dados
+ *    mesmo para o disco (fsync);
+ * 2. guardamos o ficheiro anterior como agrogest.ser.bak, como cópia de segurança;
+ * 3. só no fim trocamos o .tmp pelo agrogest.ser, numa operação atómica (rename).
+ * Se o Tomcat for abaixo a meio da escrita, o ficheiro principal continua intacto. E se o ficheiro
+ * principal estiver estragado, no arranque tentamos ler a cópia .bak.
  */
 public class Persistencia {
 
@@ -41,20 +41,26 @@ public class Persistencia {
         this.backup = pasta.resolve("agrogest.ser.bak");
     }
 
+    /** Grava todo o estado no ficheiro, seguindo os três passos descritos no topo da classe. */
     public synchronized void gravar(DataStore store) throws IOException {
         Files.createDirectories(ficheiro.getParent());
         Snapshot snapshot = store.snapshot();
 
+        // Passo 1: escrever para o ficheiro temporário.
         try (FileOutputStream fos = new FileOutputStream(temporario.toFile());
              ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(fos))) {
             out.writeObject(snapshot);
             out.flush();
+            // Garante que os bytes chegaram ao disco e não ficaram só na memória do sistema operativo.
             fos.getFD().sync();
         }
 
+        // Passo 2: guardar a versão anterior como cópia de segurança.
         if (Files.exists(ficheiro)) {
             Files.copy(ficheiro, backup, StandardCopyOption.REPLACE_EXISTING);
         }
+        // Passo 3: trocar os ficheiros de uma só vez. Se o sistema de ficheiros não suportar
+        // a troca atómica, fazemos uma troca normal.
         try {
             Files.move(temporario, ficheiro, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } catch (AtomicMoveNotSupportedException e) {
@@ -63,7 +69,9 @@ public class Persistencia {
         LOG.info("Estado gravado em " + ficheiro);
     }
 
-    /** @return true se algum ficheiro (principal ou backup) foi carregado com sucesso. */
+    /**
+     * Tenta ler primeiro o ficheiro principal e, se falhar, a cópia de segurança. Devolve true se conseguiu carregar algum.
+     */
     public synchronized boolean carregar(DataStore store) {
         for (Path p : new Path[] {ficheiro, backup}) {
             Optional<Snapshot> s = ler(p);
@@ -76,7 +84,10 @@ public class Persistencia {
         return false;
     }
 
-    /** Apaga o ficheiro de dados e o backup (os dados em memória mantêm-se). */
+    /**
+     * Apaga o ficheiro de dados e a cópia de segurança. Os dados em memória não mudam
+     * e voltam a ser gravados quando o Tomcat encerrar.
+     */
     public synchronized boolean eliminar() throws IOException {
         boolean apagou = Files.deleteIfExists(ficheiro);
         Files.deleteIfExists(backup);
@@ -108,6 +119,9 @@ public class Persistencia {
         }
     }
 
+    /**
+     * Lê um ficheiro .ser. Se estiver estragado ou for de uma versão incompatível, devolve vazio em vez de impedir o arranque.
+     */
     private Optional<Snapshot> ler(Path p) {
         if (!Files.exists(p)) {
             return Optional.empty();

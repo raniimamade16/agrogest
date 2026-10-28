@@ -10,13 +10,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Cabeçalhos de cache para os ficheiros estáticos.
- * O WAR é gerado com datas fixas (1980), por isso sem estes cabeçalhos o navegador
- * considerava o CSS antigo "fresco" durante anos e não via as novas versões.
- * <ul>
- *   <li>/css/* e /img/* — {@code no-cache}: o navegador revalida sempre (resposta 304 se não mudou);</li>
- *   <li>/fonts/* — guardadas durante um ano (os ficheiros de fontes nunca mudam).</li>
- * </ul>
+ * Diz ao navegador durante quanto tempo pode guardar os ficheiros estáticos.
+ *
+ * Encontrámos este problema nos testes: o Maven grava os ficheiros do WAR com a data fixa de 1980
+ * e, sem cabeçalhos de cache, o navegador achava que o CSS antigo continuava válido durante anos
+ * e não mostrava as alterações. Por isso:
+ * - CSS e imagens levam "no-cache": o navegador pergunta sempre ao servidor se mudaram
+ *   (quando não mudaram, a resposta é um 304, muito leve);
+ * - as fontes ficam guardadas durante um ano, porque nunca mudam.
  */
 @WebFilter({"/css/*", "/img/*", "/fonts/*"})
 public class CacheFilter extends HttpFilter {

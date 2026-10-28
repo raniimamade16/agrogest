@@ -12,7 +12,7 @@ import mz.agrogest.service.NegocioException;
 import mz.agrogest.util.Flash;
 import mz.agrogest.util.Params;
 
-/** Auto-registo de clientes. */
+/** Auto-registo de clientes. Se correr bem, o cliente fica logo com a sessão iniciada. */
 @WebServlet("/registo")
 public class RegistoServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
@@ -33,13 +33,13 @@ public class RegistoServlet extends BaseServlet {
                     Params.texto(req, "telefone", "Telefone"),
                     Params.texto(req, "endereco", "Endereço"));
             req.getSession();
-            req.changeSessionId(); // previne session fixation (exige sessão já criada)
+            req.changeSessionId(); // só funciona com uma sessão já criada, por isso a criámos na linha anterior
             req.getSession().setAttribute(AuthFilter.UTILIZADOR, u);
             Flash.sucesso(req, "Bem-vindo(a), " + u.getNome() + "! A sua conta foi criada.");
             redirect(req, res, "/catalogo");
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
-            render(req, res, "registo"); // os valores do formulário são repostos a partir de ${param}
+            render(req, res, "registo"); // voltamos ao formulário com o erro; a JSP volta a preencher os campos
         }
     }
 }

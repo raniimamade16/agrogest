@@ -4,7 +4,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** Linha de relatório: totais de compras de um cliente. */
+/**
+ * Linha dos relatórios: junta um cliente com os totais das suas compras.
+ * Não é gravado em lado nenhum; é calculado na hora pelo RelatorioService.
+ */
 public class ResumoCliente implements Serializable {
     private static final long serialVersionUID = 1L;
 

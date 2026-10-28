@@ -13,6 +13,9 @@ import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Ordenacao;
 import mz.agrogest.util.Params;
 
+/**
+ * Gestão de fornecedores. O mesmo endereço serve para criar e remover; o campo escondido "acao" indica qual.
+ */
 @WebServlet("/admin/fornecedores")
 public class FornecedoresServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

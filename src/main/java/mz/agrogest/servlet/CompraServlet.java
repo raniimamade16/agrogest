@@ -11,7 +11,10 @@ import mz.agrogest.model.Venda;
 import mz.agrogest.service.NegocioException;
 import mz.agrogest.util.Flash;
 
-/** Checkout: GET mostra o resumo para confirmação; POST confirma e emite a factura. */
+/**
+ * Checkout. O GET mostra o resumo para o cliente confirmar; o POST confirma a compra,
+ * desconta o stock e emite a factura.
+ */
 @WebServlet("/compra")
 public class CompraServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

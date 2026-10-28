@@ -6,8 +6,9 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Mensagens "flash": guardadas na sessão antes de um redirect (padrão Post/Redirect/Get)
- * e mostradas uma única vez pelo cabeçalho comum das JSP.
+ * Mensagens "flash": avisos de sucesso ou de erro que têm de sobreviver a um redirect.
+ * Guardamo-las na sessão antes de redirecionar; o cabeçalho comum das JSP mostra-as uma
+ * única vez e apaga-as logo a seguir.
  */
 public final class Flash {
 

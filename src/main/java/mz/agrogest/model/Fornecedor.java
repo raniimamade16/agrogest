@@ -2,6 +2,10 @@ package mz.agrogest.model;
 
 import java.io.Serializable;
 
+/**
+ * Empresa que vende sementes, fertilizantes ou maquinaria ao agricultor.
+ * Cada produto do catálogo está ligado a um fornecedor.
+ */
 public class Fornecedor implements Serializable {
     private static final long serialVersionUID = 1L;
 

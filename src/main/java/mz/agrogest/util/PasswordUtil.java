@@ -9,8 +9,14 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 /**
- * Hash de palavras-passe com PBKDF2-HMAC-SHA256 e salt aleatório.
- * Formato guardado: {@code iteracoes:saltBase64:hashBase64}.
+ * Gera e verifica o hash das palavras-passe, porque o enunciado pede que nenhuma password
+ * fique guardada em texto puro.
+ *
+ * Usamos PBKDF2 com SHA-256, um algoritmo próprio para passwords: repete o cálculo 65 536 vezes,
+ * o que torna muito lento tentar adivinhar uma password por força bruta. Cada password leva um
+ * "salt" aleatório, por isso duas pessoas com a mesma password ficam com hashes diferentes.
+ *
+ * O texto guardado tem o formato iteracoes:salt:hash (o salt e o hash em Base64).
  */
 public final class PasswordUtil {
 
@@ -21,6 +27,7 @@ public final class PasswordUtil {
     private PasswordUtil() {
     }
 
+    /** Gera o hash de uma password nova (usado no registo e na criação da conta de administrador). */
     public static String hash(String password) {
         byte[] salt = new byte[16];
         RANDOM.nextBytes(salt);
@@ -29,6 +36,7 @@ public final class PasswordUtil {
         return ITERACOES + ":" + b64.encodeToString(salt) + ":" + b64.encodeToString(h);
     }
 
+    /** Confere se a password escrita no login corresponde ao hash guardado. */
     public static boolean verificar(String password, String guardado) {
         if (password == null || guardado == null) {
             return false;
@@ -41,6 +49,7 @@ public final class PasswordUtil {
         byte[] salt = b64.decode(partes[1]);
         byte[] esperado = b64.decode(partes[2]);
         byte[] calculado = pbkdf2(password.toCharArray(), salt, Integer.parseInt(partes[0]));
+        // O MessageDigest.isEqual compara sempre todos os bytes, para o tempo de resposta não dar pistas.
         return MessageDigest.isEqual(esperado, calculado);
     }
 

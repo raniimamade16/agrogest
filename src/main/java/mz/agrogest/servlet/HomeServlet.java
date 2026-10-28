@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mz.agrogest.model.Utilizador;
 
-/** Raiz da aplicação: encaminha cada perfil para a sua página inicial. */
+/** Página inicial (/). Não tem conteúdo próprio: envia cada pessoa para a sua área conforme o perfil. */
 @WebServlet("")
 public class HomeServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

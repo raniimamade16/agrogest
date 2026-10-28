@@ -11,11 +11,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import mz.agrogest.model.Venda;
 import mz.agrogest.servlet.BaseServlet;
 
+/** Painel do administrador: contadores, totais, últimas vendas e produtos com pouco stock. */
 @WebServlet({"/admin", "/admin/", "/admin/dashboard"})
 public class DashboardServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
 
-    /** Abaixo deste stock o produto aparece no alerta do dashboard. */
+    /** Produtos com menos unidades do que este valor aparecem no aviso de stock baixo. */
     private static final int STOCK_BAIXO = 20;
 
     @Override

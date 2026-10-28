@@ -3,6 +3,11 @@ package mz.agrogest.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/**
+ * Uma campanha agrícola corresponde a um ciclo de produção, por exemplo de outubro a junho.
+ * Depois de fechada, a campanha é considerada terminada e já não aceita novos cultivos
+ * (pode ser reaberta pelo administrador se for preciso corrigir alguma coisa).
+ */
 public class Campanha implements Serializable {
     private static final long serialVersionUID = 1L;
 

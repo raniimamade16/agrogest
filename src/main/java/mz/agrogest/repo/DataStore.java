@@ -16,11 +16,16 @@ import mz.agrogest.model.Utilizador;
 import mz.agrogest.model.Venda;
 
 /**
- * Camada de persistência em memória (singleton). Todas as listas são
- * {@link Collections#synchronizedList} e os IDs são gerados por {@link AtomicInteger}.
+ * Faz o papel da "base de dados" da aplicação, mas tudo fica em memória RAM, como pede o enunciado.
  *
- * Operações compostas (ler-validar-escrever) devem ser feitas dentro de
- * {@code synchronized (DataStore.get())} — é esse o "lock" global das transações lógicas.
+ * Existe uma única instância (padrão Singleton), partilhada por todos os pedidos HTTP.
+ * Como o Tomcat atende vários pedidos ao mesmo tempo, cada um na sua thread, as listas são
+ * Collections.synchronizedList e os IDs são gerados com AtomicInteger, para que dois pedidos
+ * simultâneos nunca recebam o mesmo número.
+ *
+ * Atenção: a synchronizedList só protege operações isoladas (um add ou um remove). Quando uma
+ * operação tem vários passos, como ler o stock, validar e só depois descontar, os serviços fazem
+ * synchronized (DataStore.get()) para que nenhuma outra thread se meta a meio.
  */
 public final class DataStore {
 
@@ -49,17 +54,19 @@ public final class DataStore {
     private DataStore() {
     }
 
-    // ---------- geradores de ID ----------
+    // Geradores de IDs sequenciais. O incrementAndGet() é atómico, por isso é seguro
+    // mesmo quando chegam vários pedidos ao mesmo tempo.
     public int proximoIdUtilizador() { return seqUtilizador.incrementAndGet(); }
     public int proximoIdFornecedor() { return seqFornecedor.incrementAndGet(); }
     public int proximoIdProduto() { return seqProduto.incrementAndGet(); }
     public int proximoIdCampanha() { return seqCampanha.incrementAndGet(); }
     public int proximoIdCultivo() { return seqCultivo.incrementAndGet(); }
     public int proximoIdColheita() { return seqColheita.incrementAndGet(); }
-    /** O id da venda é também o número sequencial da factura. */
+    /** O id da venda serve também de número sequencial da factura (FT-2026-1, FT-2026-2, ...). */
     public int proximoIdVenda() { return seqVenda.incrementAndGet(); }
 
-    // ---------- acesso às listas ----------
+    // Leitura e escrita. As leituras devolvem sempre uma cópia da lista: quem a percorrer
+    // não tem problemas se, entretanto, outra thread alterar a lista original.
     public List<Utilizador> utilizadores() { return copia(utilizadores); }
     public List<Fornecedor> fornecedores() { return copia(fornecedores); }
     public List<Produto> produtos() { return copia(produtos); }
@@ -94,9 +101,12 @@ public final class DataStore {
     public boolean removerCultivo(int id) { return cultivos.removeIf(c -> c.getId() == id); }
     public boolean removerColheita(int id) { return colheitas.removeIf(c -> c.getId() == id); }
 
-    // ---------- snapshot (serialização) ----------
+    // Gravação e restauro do estado (serialização para ficheiro)
 
-    /** Fotografia consistente de todo o estado, para gravar em ficheiro. */
+    /**
+     * Tira uma "fotografia" de todo o estado para ser gravada no ficheiro.
+     * É synchronized no mesmo objeto que as vendas usam, por isso nunca apanha uma venda a meio.
+     */
     public synchronized Snapshot snapshot() {
         Snapshot s = new Snapshot();
         s.utilizadores = copia(utilizadores);
@@ -116,7 +126,9 @@ public final class DataStore {
         return s;
     }
 
-    /** Substitui todo o estado em memória pelo conteúdo do snapshot. */
+    /**
+     * Substitui tudo o que está em memória pelo conteúdo lido do ficheiro (no arranque ou no botão Restaurar).
+     */
     public synchronized void restaurar(Snapshot s) {
         limpar();
         utilizadores.addAll(s.utilizadores);
@@ -135,6 +147,7 @@ public final class DataStore {
         seqVenda.set(s.seqVenda);
     }
 
+    /** Esvazia todas as listas e põe os contadores de IDs a zero. */
     public synchronized void limpar() {
         utilizadores.clear();
         fornecedores.clear();
@@ -149,14 +162,19 @@ public final class DataStore {
         }
     }
 
-    // ---------- utilitários ----------
+    // Métodos auxiliares
 
+    /**
+     * Para percorrer uma synchronizedList é obrigatório sincronizar na própria lista
+     * (está na documentação do Java); senão podia dar ConcurrentModificationException.
+     */
     private static <T> List<T> copia(List<T> lista) {
         synchronized (lista) {
             return new ArrayList<>(lista);
         }
     }
 
+    /** Procura o primeiro elemento que cumpre o critério, com a mesma proteção da cópia. */
     private static <T> Optional<T> procurar(List<T> lista, Predicate<T> criterio) {
         synchronized (lista) {
             return lista.stream().filter(criterio).findFirst();

@@ -3,7 +3,10 @@ package mz.agrogest.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-/** Linha do carrinho (vive na sessão HTTP). */
+/**
+ * Uma linha do carrinho: o produto e a quantidade que o cliente escolheu.
+ * Só existe na sessão HTTP; desaparece quando a compra é concluída ou a sessão termina.
+ */
 public class ItemCarrinho implements Serializable {
     private static final long serialVersionUID = 1L;
 

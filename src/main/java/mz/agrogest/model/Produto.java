@@ -4,6 +4,13 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Artigo que o agricultor tem em armazém e vende aos clientes.
+ *
+ * Em vez de guardar o objeto Fornecedor completo, guardamos só o fornecedorId, como se faria
+ * com uma chave estrangeira numa base de dados. Assim não duplicamos dados e, se o nome do
+ * fornecedor mudar, todos os produtos mostram logo o nome novo.
+ */
 public class Produto implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -11,11 +18,14 @@ public class Produto implements Serializable {
     private String nome;
     private Categoria categoria;
     private int fornecedorId;
+    // Usamos BigDecimal, e não double, para os valores em dinheiro não terem erros de arredondamento.
     private BigDecimal preco;
     private int quantidade;
     private String unidade;
     private String descricao;
+    // Caminho dentro da aplicação (img/produtos/milho.jpg) ou um endereço completo da internet.
     private String foto;
+    // Pode ficar vazia (null) em produtos que não se estragam, como ferramentas e máquinas.
     private LocalDate validade;
 
     public Produto() {
@@ -39,6 +49,7 @@ public class Produto implements Serializable {
         return quantidade > 0;
     }
 
+    /** Um produto fora da validade deixa de aparecer no catálogo e já não pode ser vendido. */
     public boolean isExpirado() {
         return validade != null && validade.isBefore(LocalDate.now());
     }

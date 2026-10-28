@@ -19,31 +19,34 @@ import mz.agrogest.model.VendaItem;
 import mz.agrogest.repo.DataStore;
 
 /**
- * Dados de demonstração carregados no primeiro arranque (quando não há ficheiro .ser).
+ * Dados de demonstração, carregados só no primeiro arranque (quando ainda não existe ficheiro .ser),
+ * para a aplicação não começar vazia.
  *
- * Produtos, variedades e preços correspondem ao mercado de insumos do norte de Moçambique:
- * as variedades de semente (milho Matuba, feijão nhemba IT-18, amendoim Nametil, mapira Macia)
- * são variedades libertadas pelo IIAM e cultivadas na província de Nampula. Os fornecedores e os
- * clientes são fictícios (nomes, contactos e endereços inventados para a demonstração).
- * As fotografias vêm do Wikimedia Commons (ver docs/CREDITOS-IMAGENS.md).
+ * Tentámos que fossem realistas para a província de Nampula: as variedades de semente (milho Matuba,
+ * feijão nhemba IT-18, amendoim Nametil, mapira Macia) são variedades libertadas pelo IIAM e
+ * cultivadas no norte do país, e os preços aproximam-se dos do mercado de insumos.
+ * Os fornecedores e os clientes são inventados (nomes, contactos e moradas fictícios).
+ * As fotografias vêm do Wikimedia Commons; os créditos estão em docs/CREDITOS-IMAGENS.md.
  */
 public final class DadosIniciais {
 
+    /** Password comum a todos os clientes de demonstração, para ser fácil testar. */
     public static final String PASSWORD_CLIENTES_DEMO = "cliente123";
 
     private DadosIniciais() {
     }
 
+    /** Preenche o DataStore (que deve estar vazio) com o cenário de demonstração. */
     public static void popular(DataStore s) {
         LocalDate hoje = LocalDate.now();
 
-        // ---------- fornecedores ----------
+        // Fornecedores
         Fornecedor sementes = forn(s, "Sementes do Norte, Lda", TipoFornecedor.SEMENTES, "+258 84 312 4410", "Nampula");
         Fornecedor adubos = forn(s, "AgroInsumos Nacala, Lda", TipoFornecedor.FERTILIZANTES, "+258 86 205 7731", "Nampula");
         Fornecedor maquinas = forn(s, "Mecânica Agrícola da Zambézia", TipoFornecedor.MAQUINARIA, "+258 82 448 0912", "Zambézia");
         Fornecedor coop = forn(s, "Cooperativa Agrícola de Malema", TipoFornecedor.SEMENTES, "+258 87 119 2365", "Nampula");
 
-        // ---------- produtos ----------
+        // Produtos, cada um com a sua fotografia em img/produtos/
         Produto milho = prod(s, "Semente de Milho Matuba", Categoria.SEMENTE, sementes, "85", 600, "kg",
                 "Milho branco de polinização aberta (IIAM), ciclo de 110–120 dias, tolerante à seca. 25 kg/ha.",
                 "milho", hoje.plusMonths(10));
@@ -90,7 +93,7 @@ public final class DadosIniciais {
                 "Motobomba de 6,5 cv com entrada e saída de 3\", até 60 m³/h. Para rega a partir de rios e poços.",
                 "motobomba", null);
 
-        // ---------- clientes ----------
+        // Clientes, todos com a password de demonstração
         String pw = PasswordUtil.hash(PASSWORD_CLIENTES_DEMO);
         Utilizador ana = cli(s, "Ana Mussa", "ana@teste.mz", pw, "+258 84 511 2034", "Bairro de Muahivire, Nampula", 90);
         Utilizador carlos = cli(s, "Carlos Namashulua", "carlos@teste.mz", pw, "+258 82 640 1178", "Rua dos Continuadores, Ribáuè", 85);
@@ -101,7 +104,8 @@ public final class DadosIniciais {
         Utilizador maria = cli(s, "Maria Cossa", "maria@teste.mz", pw, "+258 82 117 8845", "Av. Eduardo Mondlane, Monapo", 50);
         cli(s, "Luísa Nhantumbo", "luisa@teste.mz", pw, "+258 86 448 2109", "Posto Administrativo de Muite, Mecubúri", 20);
 
-        // ---------- vendas (início da campanha 2026/2027: preparação de terras e sementeira) ----------
+        // Vendas das últimas semanas, no início da campanha 2026/2027 (preparação da terra e sementeira).
+        // As datas são relativas a hoje, para o painel mostrar sempre vendas recentes.
         LocalDateTime agora = LocalDateTime.now().withSecond(0).withNano(0);
         venda(s, ana, agora.minusDays(48).withHour(9).withMinute(15), item(milho, 25), item(nitrato, 2));
         venda(s, carlos, agora.minusDays(41).withHour(10).withMinute(40), item(enxada, 3), item(catana, 2));
@@ -114,7 +118,7 @@ public final class DadosIniciais {
         venda(s, fatima, agora.minusDays(5).withHour(10).withMinute(10), item(nitrato, 4), item(milho, 30));
         venda(s, ana, agora.minusDays(2).withHour(16).withMinute(25), item(composto, 10), item(enxada, 2));
 
-        // ---------- campanhas, cultivos e colheitas (já concluídas) ----------
+        // Campanhas anteriores, já fechadas, com os seus cultivos e colheitas
         Campanha c1 = campanha(s, "Campanha 2024/2025", LocalDate.of(2024, 10, 1), LocalDate.of(2025, 6, 30));
         Cultivo c1milho = cultivo(s, c1, "Milho", "Matuba", "4", LocalDate.of(2024, 11, 25));
         colheita(s, c1milho, LocalDate.of(2025, 4, 10), "7200", "16");
@@ -150,6 +154,7 @@ public final class DadosIniciais {
         return u;
     }
 
+    /** Cria uma linha de venda e desconta logo o stock, como aconteceria numa venda real. */
     private static VendaItem item(Produto p, int qtd) {
         p.setQuantidade(p.getQuantidade() - qtd);
         return new VendaItem(p.getId(), p.getNome(), p.getUnidade(), qtd, p.getPreco());

@@ -8,7 +8,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Carrinho de compras guardado na sessão do cliente. Chave = id do produto. */
+/**
+ * Carrinho de compras do cliente, guardado na sessão HTTP.
+ *
+ * Usamos um LinkedHashMap com o id do produto como chave. Assim, se o cliente adicionar o
+ * mesmo produto duas vezes, as quantidades somam-se em vez de aparecerem duas linhas, e a
+ * ordem em que os produtos foram adicionados mantém-se na página.
+ *
+ * Os métodos são synchronized porque o mesmo cliente pode ter dois separadores abertos e
+ * fazer dois pedidos ao mesmo tempo sobre a mesma sessão.
+ */
 public class Carrinho implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -24,6 +33,7 @@ public class Carrinho implements Serializable {
         }
     }
 
+    /** Muda a quantidade de um produto. Uma quantidade de 0 (ou menos) retira-o do carrinho. */
     public synchronized void atualizar(int produtoId, int quantidade) {
         if (quantidade <= 0) {
             itens.remove(produtoId);

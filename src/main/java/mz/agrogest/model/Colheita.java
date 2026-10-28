@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/** Registo de uma colheita de um cultivo: data, quilos colhidos e preço de referência por quilo. */
 public class Colheita implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -24,7 +25,10 @@ public class Colheita implements Serializable {
         this.precoKg = precoKg;
     }
 
-    /** Valor total calculado pelo sistema: quantidade (kg) x preço por kg. */
+    /**
+     * O valor total não é guardado: é calculado sempre que é pedido (kg x preço por kg).
+     * Assim nunca fica desatualizado se alguém corrigir a quantidade ou o preço.
+     */
     public BigDecimal getValorTotal() {
         return quantidadeKg.multiply(precoKg);
     }

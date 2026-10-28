@@ -8,12 +8,17 @@ import mz.agrogest.model.Utilizador;
 import mz.agrogest.repo.DataStore;
 import mz.agrogest.util.PasswordUtil;
 
-/** Autenticação, auto-registo de clientes e gestão de contas. */
+/**
+ * Tudo o que tem a ver com contas: login, registo de clientes, conta de administrador e ativação de clientes.
+ */
 public class AuthService {
 
+    // Credenciais fixas do administrador, definidas no enunciado. A palavra-passe só é usada no
+    // arranque para gerar o hash; o que fica guardado em memória e no ficheiro é o hash.
     public static final String ADMIN_EMAIL = "admin@agro.mz";
     public static final String ADMIN_PASSWORD = "admin234";
 
+    // Validação simples do formato do email: algo@algo.dominio
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     private final DataStore store;
@@ -22,7 +27,7 @@ public class AuthService {
         this.store = store;
     }
 
-    /** Garante que a conta fixa de administrador existe (chamado no arranque). */
+    /** Cria a conta de administrador se ainda não existir. É chamado sempre que a aplicação arranca. */
     public void garantirAdmin() {
         synchronized (store) {
             if (store.utilizadorPorEmail(ADMIN_EMAIL).isEmpty()) {
@@ -32,6 +37,9 @@ public class AuthService {
         }
     }
 
+    /**
+     * Procura o utilizador pelo email e compara a palavra-passe com o hash guardado. Devolve vazio se não bater certo.
+     */
     public Optional<Utilizador> autenticar(String email, String password) {
         if (email == null || password == null) {
             return Optional.empty();
@@ -40,6 +48,7 @@ public class AuthService {
                 .filter(u -> PasswordUtil.verificar(password, u.getPasswordHash()));
     }
 
+    /** Regista um novo cliente depois de validar o email, o tamanho da palavra-passe e a confirmação. */
     public Utilizador registarCliente(String nome, String email, String password, String confirmacao,
                                       String telefone, String endereco) {
         email = email.trim().toLowerCase();
@@ -52,7 +61,8 @@ public class AuthService {
         if (!password.equals(confirmacao)) {
             throw new NegocioException("As palavras-passe não coincidem.");
         }
-        // verificação de unicidade + inserção têm de ser atómicas
+        // A pergunta "este email já existe?" e a inserção têm de acontecer juntas, sem ninguém pelo meio.
+        // Sem o synchronized, dois registos ao mesmo tempo com o mesmo email podiam passar os dois.
         synchronized (store) {
             if (store.utilizadorPorEmail(email).isPresent()) {
                 throw new NegocioException("Já existe uma conta com o email " + email + ".");
@@ -64,6 +74,7 @@ public class AuthService {
         }
     }
 
+    /** Ativa ou desativa a conta de um cliente. A conta do administrador nunca pode ser desativada. */
     public void alternarAtivo(int clienteId) {
         synchronized (store) {
             Utilizador u = store.utilizador(clienteId)

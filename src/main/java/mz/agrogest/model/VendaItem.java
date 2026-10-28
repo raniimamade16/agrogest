@@ -4,8 +4,11 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * Linha de uma venda. Guarda uma cópia do nome e do preço no momento da compra,
- * para que a factura não mude se o produto for alterado ou removido depois.
+ * Uma linha da factura, ou seja, um produto comprado.
+ *
+ * Copiamos o nome, a unidade e o preço do produto no momento da compra. Se mais tarde o
+ * administrador mudar o preço ou remover o produto, as facturas antigas continuam corretas,
+ * tal como uma factura em papel não muda depois de emitida.
  */
 public class VendaItem implements Serializable {
     private static final long serialVersionUID = 1L;

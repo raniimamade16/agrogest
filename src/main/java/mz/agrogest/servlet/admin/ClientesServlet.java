@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Params;
 
-/** Ativar/desativar contas de cliente (a listagem está em /admin/listagens?tipo=clientes). */
+/** Ativa ou desativa contas de clientes. A lista de clientes está em /admin/listagens?tipo=clientes. */
 @WebServlet("/admin/clientes")
 public class ClientesServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

@@ -12,8 +12,9 @@ import mz.agrogest.service.NegocioException;
 import mz.agrogest.util.Params;
 
 /**
- * Carrinho em sessão.
- * GET /carrinho — ver; POST /carrinho/adicionar | /atualizar | /remover | /esvaziar.
+ * Gere o carrinho de compras, que fica guardado na sessão HTTP.
+ * GET /carrinho mostra o carrinho. As alterações chegam por POST para /carrinho/adicionar,
+ * /carrinho/atualizar, /carrinho/remover e /carrinho/esvaziar; o getPathInfo() diz-nos qual foi pedida.
  */
 @WebServlet({"/carrinho", "/carrinho/*"})
 public class CarrinhoServlet extends BaseServlet {
@@ -34,6 +35,7 @@ public class CarrinhoServlet extends BaseServlet {
             case "/adicionar" -> executar(req, res, voltarPara(req), () -> {
                 Produto p = catalogoService.obterProduto(Params.inteiro(req, "produtoId", "Produto"));
                 int qtd = quantidadePositiva(req);
+                // Regra a) do enunciado: somando o que já está no carrinho, não se pode passar o stock.
                 int total = c.quantidadeDe(p.getId()) + qtd;
                 if (total > p.getQuantidade()) {
                     throw new NegocioException("Indisponível: só há " + p.getQuantidade() + " " + p.getUnidade()
@@ -64,6 +66,7 @@ public class CarrinhoServlet extends BaseServlet {
         }
     }
 
+    /** Lê a quantidade do formulário e recusa zero ou valores negativos. */
     private static int quantidadePositiva(HttpServletRequest req) {
         int qtd = Params.inteiro(req, "quantidade", "Quantidade");
         if (qtd <= 0) {
@@ -72,7 +75,10 @@ public class CarrinhoServlet extends BaseServlet {
         return qtd;
     }
 
-    /** Depois de adicionar, volta ao catálogo (mantendo o filtro de categoria). */
+    /**
+     * Depois de adicionar, volta ao catálogo mantendo a categoria que estava filtrada.
+     * Só aceitamos letras maiúsculas, para ninguém conseguir usar este parâmetro para redirecionar para outro site.
+     */
     private static String voltarPara(HttpServletRequest req) {
         String cat = req.getParameter("categoria");
         return cat == null || cat.isBlank() || !cat.matches("[A-Z]+") ? "/catalogo" : "/catalogo?categoria=" + cat;

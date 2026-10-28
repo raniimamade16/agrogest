@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mz.agrogest.servlet.BaseServlet;
 
+/** Página de relatórios de clientes. Os cálculos estão todos no RelatorioService. */
 @WebServlet("/admin/relatorios")
 public class RelatoriosServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;

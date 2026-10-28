@@ -11,7 +11,7 @@ import mz.agrogest.model.Colheita;
 import mz.agrogest.model.Cultivo;
 import mz.agrogest.repo.DataStore;
 
-/** Campanhas agrícolas, cultivos e colheitas. */
+/** Regras de negócio da parte agrícola: campanhas, cultivos e colheitas. */
 public class AgricolaService {
 
     private final DataStore store;
@@ -20,8 +20,9 @@ public class AgricolaService {
         this.store = store;
     }
 
-    // ---------- campanhas ----------
+    // Campanhas
 
+    /** Cria uma campanha. A data de fim não pode ser anterior à data de início. */
     public Campanha criarCampanha(String nome, LocalDate inicio, LocalDate fim) {
         if (fim.isBefore(inicio)) {
             throw new NegocioException("A data de fim não pode ser anterior à data de início.");
@@ -31,12 +32,14 @@ public class AgricolaService {
         return c;
     }
 
+    /** Fecha ou reabre uma campanha. */
     public void definirFechada(int id, boolean fechada) {
         synchronized (store) {
             obterCampanha(id).setFechada(fechada);
         }
     }
 
+    /** Regra do enunciado: não se pode remover uma campanha que tenha cultivos associados. */
     public void removerCampanha(int id) {
         synchronized (store) {
             long n = store.cultivos().stream().filter(c -> c.getCampanhaId() == id).count();
@@ -57,8 +60,11 @@ public class AgricolaService {
         return store.campanhas().stream().collect(Collectors.toMap(Campanha::getId, Function.identity()));
     }
 
-    // ---------- cultivos ----------
+    // Cultivos
 
+    /**
+     * Regista um cultivo numa campanha. Só é permitido em campanhas abertas, porque uma campanha fechada já terminou.
+     */
     public Cultivo criarCultivo(int campanhaId, String cultura, String variedade, BigDecimal hectares,
                                 LocalDate plantio) {
         if (hectares.signum() <= 0) {
@@ -75,6 +81,7 @@ public class AgricolaService {
         }
     }
 
+    /** Regra do enunciado: não se pode remover um cultivo que já tenha colheitas registadas. */
     public void removerCultivo(int id) {
         synchronized (store) {
             long n = store.colheitas().stream().filter(c -> c.getCultivoId() == id).count();
@@ -91,8 +98,9 @@ public class AgricolaService {
         return store.cultivos().stream().collect(Collectors.toMap(Cultivo::getId, Function.identity()));
     }
 
-    // ---------- colheitas ----------
+    // Colheitas
 
+    /** Regista uma colheita. Uma data anterior ao plantio é recusada, porque só pode ser um engano. */
     public Colheita registarColheita(int cultivoId, LocalDate data, BigDecimal kg, BigDecimal precoKg) {
         if (kg.signum() <= 0 || precoKg.signum() <= 0) {
             throw new NegocioException("A quantidade e o preço por kg devem ser maiores que zero.");
@@ -115,6 +123,7 @@ public class AgricolaService {
         }
     }
 
+    /** Soma do valor de todas as colheitas, mostrada no painel do administrador. */
     public BigDecimal valorTotalColheitas() {
         return store.colheitas().stream().map(Colheita::getValorTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }

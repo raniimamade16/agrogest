@@ -15,6 +15,7 @@ import mz.agrogest.service.NegocioException;
 import mz.agrogest.servlet.BaseServlet;
 import mz.agrogest.util.Params;
 
+/** Gestão de campanhas: criar, fechar, reabrir e remover. */
 @WebServlet("/admin/campanhas")
 public class CampanhasServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
@@ -23,6 +24,7 @@ public class CampanhasServlet extends BaseServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         var campanhas = store.campanhas();
         campanhas.sort(Comparator.comparing(Campanha::getInicio).reversed());
+        // Contamos os cultivos de cada campanha para a JSP desativar o botão Remover quando há cultivos.
         Map<Integer, Long> nCultivos = store.cultivos().stream()
                 .collect(Collectors.groupingBy(Cultivo::getCampanhaId, Collectors.counting()));
         req.setAttribute("campanhas", campanhas);

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+/** Termina a sessão (o invalidate apaga também o carrinho) e volta à página de login. */
 @WebServlet("/logout")
 public class LogoutServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
